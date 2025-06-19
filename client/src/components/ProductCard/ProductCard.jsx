@@ -171,7 +171,7 @@ export default function ProductCard({ product: initialProduct }) {
                     image={mainImage}
                     alt={product.name}
                     className={styles.productImage}
-                    onClick={() => navigate(`/producto/${product.id}`)}
+                    onClick={() => navigate(`/producto/${product.id}`, { replace: false })}
                     onError={(e) => {
                         e.target.src = '/assets/placeholder.jpg';
                     }}

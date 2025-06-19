@@ -11,20 +11,39 @@ import styles from './Catalog.module.css';
 import { FavoritesProvider } from '../../context/FavoritesContext';
 
 export default function CatalogPage() {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(1);
     const productsPerPage = 12;
+
+    const page = parseInt(searchParams.get('page')) || 1;
+    const category = searchParams.get('category');
+
+    // Restaurar la posición del scroll cuando se cargan los productos
+    useEffect(() => {
+        if (!loading && products.length > 0) {
+            const savedPosition = parseInt(localStorage.getItem(`scroll_position_${category}`)) || 0;
+            
+            if (savedPosition > 0) {
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: savedPosition,
+                        behavior: 'instant'
+                    });
+                    // Limpiar la posición después de restaurarla para que no afecte la navegación normal
+                    localStorage.removeItem(`scroll_position_${category}`);
+                }, 100);
+            }
+        }
+    }, [loading, products, category]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const categoryFromUrl = searchParams.get('category');
                 
-                if (!categoryFromUrl) {
+                if (!category) {
                     // Si no hay categoría, cargar todas las categorías
                     const q = query(collection(db, 'categories'), orderBy('order', 'asc'));
                     const categoriesSnapshot = await getDocs(q);
@@ -38,7 +57,7 @@ export default function CatalogPage() {
                 }
 
                 // Si hay categoría, cargar productos de esa categoría
-                const normalizedCategory = normalizeCategoryName(categoryFromUrl);
+                const normalizedCategory = normalizeCategoryName(category);
                 const productsQuery = query(
                     collection(db, 'products'),
                     where('category', '==', normalizedCategory)
@@ -55,13 +74,12 @@ export default function CatalogPage() {
                 const productsWithStock = productsList.filter(product => {
                     if (!product.inventory) return false;
                     
-                    // Sumar todo el stock del producto
                     const totalStock = Object.values(product.inventory).reduce((sum, stock) => sum + stock, 0);
                     return totalStock > 0;
                 });
 
                 setProducts(productsWithStock);
-                setPage(1); // Resetear la página cuando cambia la categoría
+
             } catch (error) {
                 console.error('Error al obtener los datos:', error);
             } finally {
@@ -70,7 +88,7 @@ export default function CatalogPage() {
         };
 
         fetchData();
-    }, [searchParams]);
+    }, [searchParams, category]);
 
     // Calcular los productos para la página actual
     const indexOfLastProduct = page * productsPerPage;
@@ -79,8 +97,12 @@ export default function CatalogPage() {
     const totalPages = Math.ceil(products.length / productsPerPage);
 
     const handlePageChange = (event, value) => {
-        setPage(value);
+        setSearchParams({ category, page: value.toString() }, { replace: false });
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleProductClick = () => {
+        localStorage.setItem(`scroll_position_${category}`, window.scrollY.toString());
     };
 
     if (loading) {
@@ -92,7 +114,7 @@ export default function CatalogPage() {
     }
 
     // Si no hay categoría seleccionada, mostrar todas las categorías
-    if (!searchParams.get('category')) {
+    if (!category) {
         return (
             <FavoritesProvider>
                 <Container maxWidth="xl" className={styles.catalogContainer}>
@@ -116,14 +138,16 @@ export default function CatalogPage() {
         <FavoritesProvider>
             <Container maxWidth="xl" className={styles.catalogContainer}>
                 <Typography variant="h3" className={styles.catalogTitle}>
-                    {normalizeCategoryName(searchParams.get('category'))}
+                    {normalizeCategoryName(category)}
                 </Typography>
 
                 <Grid container spacing={3} className={styles.productsGrid}>
                     {currentProducts.length > 0 ? (
                         currentProducts.map(product => (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={product.id} className={styles.productItem}>
-                                <ProductCard product={product} />
+                                <div onClick={handleProductClick} style={{ height: '100%' }}>
+                                    <ProductCard product={product} />
+                                </div>
                             </Grid>
                         ))
                     ) : (
