@@ -1,7 +1,15 @@
 import { Card, CardActionArea, CardMedia, CardContent, Typography, Box } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function CategoryCard({ category }) {
+    const navigate = useNavigate();
+
+    const handleCategoryClick = () => {
+        const categoryName = category?.name?.toLowerCase() || 'sin-categoria';
+        // Navegar a la categoría, asegurando que siempre estemos en la página 1
+        navigate(`/catalogo?category=${categoryName}&page=1`, { replace: false });
+    };
+
     return (
         <Card sx={{
             position: 'relative',
@@ -15,7 +23,7 @@ export default function CategoryCard({ category }) {
                 boxShadow: '0 6px 16px rgba(0,0,0,0.15)'
             }
         }}>
-            <CardActionArea component={Link} to={`/catalogo?category=${category?.name?.toLowerCase() || 'sin-categoria'}`}>
+            <CardActionArea onClick={handleCategoryClick}>
                 {/* Imagen de la categoría */}
                 <CardMedia
                     component="img"
