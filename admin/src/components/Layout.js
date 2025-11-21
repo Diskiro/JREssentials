@@ -23,6 +23,7 @@ import {
   CloudUpload as UploadIcon,
   Logout as LogoutIcon,
   People as PeopleIcon,
+  SupervisorAccount as SupervisorAccountIcon,
 } from '@mui/icons-material';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -38,6 +39,7 @@ const menuItems = [
   { text: 'Órdenes', icon: <OrdersIcon />, path: '/orders' },
   { text: 'Subir Productos', icon: <UploadIcon />, path: '/upload' },
   { text: 'Usuarios', icon: <PeopleIcon />, path: '/users' },
+  { text: 'Administradores', icon: <SupervisorAccountIcon />, path: '/admin-users' },
 ];
 
 function Layout() {
@@ -154,4 +156,4 @@ function Layout() {
   );
 }
 
-export default Layout; 
+export default Layout;

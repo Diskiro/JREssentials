@@ -9,19 +9,19 @@ const Accessories = () => {
                 <Box className={styles.imageContainer}>
                     <img
                         src="/CharysBoutique.jpeg"
-                        alt="Chary's Boutique"
+                        alt="J&R Essentials"
                         className={styles.logo}
                     />
                 </Box>
-                
+
                 <Typography variant="h2" component="h1" className={styles.mainTitle}>
                     PRÓXIMAMENTE
                 </Typography>
-                
+
                 <Typography variant="h4" component="h2" className={styles.subtitle}>
                     ¡ESPÉRALO!
                 </Typography>
-                
+
                 <Typography variant="body1" className={styles.description}>
                     Estamos preparando una increíble colección de accesorios para complementar tu estilo.
                 </Typography>

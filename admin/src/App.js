@@ -12,6 +12,8 @@ import Categories from './pages/Categories';
 import Orders from './pages/Orders';
 import UploadProducts from './pages/UploadProducts';
 import Users from './pages/Users';
+import AdminUsers from './pages/AdminUsers';
+import RegisterAdmin from './pages/RegisterAdmin';
 
 
 function ProtectedRoute({ children }) {
@@ -36,6 +38,7 @@ function App() {
                 <Router>
                     <Routes>
                         <Route path="/login" element={<Login />} />
+                        <Route path="/register-first-admin" element={<RegisterAdmin />} />
                         <Route
                             path="/"
                             element={
@@ -50,6 +53,7 @@ function App() {
                             <Route path="orders" element={<Orders />} />
                             <Route path="upload" element={<UploadProducts />} />
                             <Route path="users" element={<Users />} />
+                            <Route path="admin-users" element={<AdminUsers />} />
                         </Route>
                     </Routes>
                 </Router>

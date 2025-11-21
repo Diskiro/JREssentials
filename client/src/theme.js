@@ -15,7 +15,7 @@ export const theme = createTheme({
       contrastText: '#FFFFFF',
     },
     background: {
-      default: '#FFF0F5', // Rosa muy claro
+      default: '#fff', // Rosa muy claro
       paper: '#FFFFFF',
     },
     text: {

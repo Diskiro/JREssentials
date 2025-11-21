@@ -23,7 +23,7 @@
 .productsGrid[class*="MuiGrid-root"] {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
 /* Selector más específico para cada item de producto */
@@ -48,7 +48,7 @@
   }
   
   .productsGrid[class*="MuiGrid-root"] {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

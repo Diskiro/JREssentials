@@ -5,12 +5,12 @@
   "targets": {
     "charys-clothes-store": {
       "hosting": {
-        "admin": [
-          "charys-clothes-store-admin"
-        ],
         "tienda": [
           "charys-clothes-store",
           "charysboutique"
+        ],
+        "admin": [
+          "jr-essentials-store-4dm1nn"
         ]
       }
     }

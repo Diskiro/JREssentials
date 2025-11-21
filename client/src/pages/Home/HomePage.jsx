@@ -25,7 +25,7 @@ export default function HomePage() {
                 // Filtrar productos que tienen al menos una talla con stock
                 const productsWithStock = productsData.filter(product => {
                     if (!product.inventory) return false;
-                    
+
                     // Sumar todo el stock del producto
                     const totalStock = Object.values(product.inventory).reduce((sum, stock) => sum + stock, 0);
                     return totalStock > 0;
@@ -67,7 +67,7 @@ export default function HomePage() {
                 {/* Banner promocional personalizado */}
                 <div className={styles.promoSection}>
                     <Typography variant="h2" className={styles.promoTitle}>
-                        Chary's Boutique
+                        J&R Essentials
                     </Typography>
                     <Typography variant="h5" className={styles.promoSubtitle}>
                         Tu destino para moda y belleza: ropa curvy exclusiva y todo para tu belleza
@@ -124,9 +124,9 @@ export default function HomePage() {
                 </Grid>
                 {categories.length > 6 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem' }}>
-                        <Button 
-                            variant="outlined" 
-                            color="secondary" 
+                        <Button
+                            variant="outlined"
+                            color="secondary"
                             href="/categorias"
                             className={styles.showAllCategoriesBtn}
                         >
@@ -140,7 +140,7 @@ export default function HomePage() {
                     <Grid item xs={12} md={6} className={styles.aboutGridImage}>
                         <img
                             src="/CharysBoutique.jpeg"
-                            alt="Chary's Boutique"
+                            alt="J&R Essentials"
                             className={styles.aboutImage}
                         />
                     </Grid>
@@ -149,10 +149,10 @@ export default function HomePage() {
                             Nuestra Marca
                         </Typography>
                         <Typography paragraph className={styles.aboutText}>
-                            Charys Clothes Store nació con la pasión por ofrecer moda accesible y de calidad...
+                            J&R Essentials nació con la pasión por ofrecer moda accesible y de calidad...
                         </Typography>
-                        <Button 
-                            variant="contained" 
+                        <Button
+                            variant="contained"
                             color="primary"
                             className={styles.aboutButton}
                             component={Link}

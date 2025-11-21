@@ -1,4 +1,4 @@
-import { Box, Container, Grid, Typography, Link, Divider, IconButton} from '@mui/material';
+import { Box, Container, Grid, Typography, Link, Divider, IconButton } from '@mui/material';
 import { Facebook, WhatsApp } from '@mui/icons-material';
 
 const Footer = () => {
@@ -17,7 +17,7 @@ const Footer = () => {
                     {/* Logo y descripción */}
                     <Grid item xs={12} md={4}>
                         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-                            Chary's Boutique
+                            J&R Essentials
                         </Typography>
                         <Typography variant="body1" sx={{ mb: 2 }}>
                             Tu destino para moda femenina: ropa exclusiva y accesorios elegantes.
@@ -91,7 +91,7 @@ const Footer = () => {
 
                 {/* Derechos de autor */}
                 <Typography variant="body2" align="center">
-                    © {new Date().getFullYear()} Chary's Boutique. Todos los derechos reservados.
+                    © {new Date().getFullYear()} J&R Essentials. Todos los derechos reservados.
                 </Typography>
             </Container>
         </Box>

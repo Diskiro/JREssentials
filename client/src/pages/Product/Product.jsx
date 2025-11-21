@@ -11,6 +11,7 @@ import { useFavorites } from '../../context/FavoritesContext';
 import { useNavigate } from 'react-router-dom';
 import { FavoritesProvider } from '../../context/FavoritesContext';
 import ShareButton from '../../components/ShareButton/ShareButton';
+import styles from './Product.module.css';
 
 const ProductPageContent = () => {
     const { id } = useParams();
@@ -32,11 +33,21 @@ const ProductPageContent = () => {
             try {
                 const docRef = doc(db, 'products', id);
                 const docSnap = await getDoc(docRef);
-                
+
                 if (docSnap.exists()) {
                     const productData = { id: docSnap.id, ...docSnap.data() };
                     setProduct(productData);
-                    
+
+                    // Auto-select 'Unitalla' for 'Aretes' category
+                    if (productData.category === 'Aretes' && productData.inventory) {
+                        const inventoryKeys = Object.keys(productData.inventory);
+                        const unitallaKey = inventoryKeys.find(key => key.toLowerCase().includes('unitalla'));
+                        if (unitallaKey) {
+                            const size = unitallaKey.split('__')[1];
+                            setSelectedSize(size);
+                        }
+                    }
+
                     // Precargar todas las imágenes
                     if (productData.images && productData.images.length > 0) {
                         productData.images.forEach((imageUrl, index) => {
@@ -114,11 +125,11 @@ const ProductPageContent = () => {
         try {
             const success = await addToCart(product, selectedSize, quantity);
             if (success) {
-        setSnackbar({
-            open: true,
-            message: 'Producto agregado al carrito',
-            severity: 'success'
-        });
+                setSnackbar({
+                    open: true,
+                    message: 'Producto agregado al carrito',
+                    severity: 'success'
+                });
                 // Actualizar el stock local después de agregar al carrito
                 const newStock = currentStock - quantity;
                 setProduct(prev => ({
@@ -148,13 +159,13 @@ const ProductPageContent = () => {
     };
 
     const handlePreviousImage = () => {
-        setCurrentImageIndex((prevIndex) => 
+        setCurrentImageIndex((prevIndex) =>
             prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
         );
     };
 
     const handleNextImage = () => {
-        setCurrentImageIndex((prevIndex) => 
+        setCurrentImageIndex((prevIndex) =>
             prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
         );
     };
@@ -199,7 +210,7 @@ const ProductPageContent = () => {
     if (!product) return null;
 
     const formattedPrice = formatPrice(product.price);
-    
+
     // Obtener las tallas disponibles del inventario
     const availableSizes = Object.entries(product.inventory || {})
         .filter(([_, stock]) => stock > 0)
@@ -219,7 +230,7 @@ const ProductPageContent = () => {
                     justifyContent: 'center',
                     alignItems: 'flex-start'
                 }}>
-                    <Box sx={{ 
+                    <Box sx={{
                         width: '100%',
                         maxWidth: '600px',
                         position: 'relative',
@@ -250,7 +261,7 @@ const ProductPageContent = () => {
                         <img
                             src={product.images[currentImageIndex]}
                             alt={product.name}
-                            style={{ 
+                            style={{
                                 width: '100%',
                                 height: '100%',
                                 display: 'block',
@@ -260,7 +271,7 @@ const ProductPageContent = () => {
                                 '@media (maxWidth: 768px)': {
                                     width: '100%',
                                     height: '400px',
-                                    objectFit: 'contain' 
+                                    objectFit: 'contain'
                                 }
                             }}
                         />
@@ -325,105 +336,105 @@ const ProductPageContent = () => {
 
                 {/* Información del producto */}
                 <Grid item xs={12} md={6}>
-                    <Box sx={{ 
+                    <Box sx={{
                         maxWidth: '400px',
                         '@media (min-width: 769px)': {
                             margin: '0 auto'
                         }
                     }}>
-                    <Typography variant="h4" gutterBottom>
-                        {product.name}
-                    </Typography>
-                    <Typography variant="h5" color="primary" gutterBottom>
-                        {formattedPrice}
-                    </Typography>
-                    <Typography 
-                        variant="body1" 
-                        paragraph 
-                        sx={{ 
-                            whiteSpace: 'pre-line'
-                        }}
-                    >
-                        {product.description}
-                    </Typography>
-
-                    <Divider sx={{ my: 2 }} />
-
-                    {/* Tallas */}
-                        {availableSizes && availableSizes.length > 0 && (
-                        <Box sx={{ mb: 2 }}>
-                            <Typography variant="subtitle1" gutterBottom>
-                                Talla
-                            </Typography>
-                            <FormControl fullWidth>
-                                <InputLabel>Talla</InputLabel>
-                                <Select
-                                    value={selectedSize}
-                                    onChange={(e) => setSelectedSize(e.target.value)}
-                                    label="Talla"
-                                >
-                                    <MenuItem value="">
-                                        <em>Selecciona una talla</em>
-                                    </MenuItem>
-                                    {availableSizes.map((size) => (
-                                        <MenuItem key={size} value={size}>
-                                                {size} ({product.inventory[`${product.id}__${size}`]} disponibles)
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-                    )}
-
-                    {/* Cantidad */}
-                    <Box sx={{ mb: 3 }}>
-                        <Typography variant="subtitle1" gutterBottom>
-                            Cantidad
+                        <Typography variant="h4" gutterBottom>
+                            {product.name}
                         </Typography>
-                        <TextField
-                            type="number"
-                            value={quantity}
-                            onChange={handleQuantityChange}
-                            inputProps={{ 
-                                min: 1,
-                                max: maxQuantity,
-                                step: 1
+                        <Typography variant="h5" color="primary" gutterBottom>
+                            {formattedPrice}
+                        </Typography>
+                        <Typography
+                            variant="body1"
+                            paragraph
+                            sx={{
+                                whiteSpace: 'pre-line'
                             }}
-                            fullWidth
-                            disabled={!selectedSize || maxQuantity === 0}
-                        />
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            {selectedSize 
-                                    ? `${product.inventory[`${product.id}__${selectedSize}`] || 0} disponibles` 
-                                : 'Selecciona una talla'}
+                        >
+                            {product.description}
                         </Typography>
-                    </Box>
 
-                    {/* Botones de acción */}
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                        <IconButton 
-                            aria-label="add to favorites" 
-                            color="secondary" 
-                            size="large"
-                            onClick={handleFavoriteClick}
-                        >
-                            {isFavorite(product.id) ? <Favorite /> : <FavoriteBorder />}
-                        </IconButton>
-                        <ShareButton 
-                            productUrl={`${window.location.origin}/producto/${product.id}`}
-                            productName={product.name}
-                        />
-                        <Button
-                            variant="contained"
-                            size="large"
-                            startIcon={<AddShoppingCart />}
-                            fullWidth
-                            onClick={handleAddToCart}
-                            disabled={!selectedSize || maxQuantity === 0}
-                        >
-                            {maxQuantity === 0 ? 'Sin stock' : 'Añadir al carrito'}
-                        </Button>
-                    </Box>
+                        <Divider sx={{ my: 2 }} />
+
+                        {/* Tallas */}
+                        {availableSizes && availableSizes.length > 0 && product.category !== 'Aretes' && (
+                            <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle1" gutterBottom>
+                                    Talla
+                                </Typography>
+                                <FormControl fullWidth>
+                                    <InputLabel>Talla</InputLabel>
+                                    <Select
+                                        value={selectedSize}
+                                        onChange={(e) => setSelectedSize(e.target.value)}
+                                        label="Talla"
+                                    >
+                                        <MenuItem value="">
+                                            <em>Selecciona una talla</em>
+                                        </MenuItem>
+                                        {availableSizes.map((size) => (
+                                            <MenuItem key={size} value={size}>
+                                                {size} ({product.inventory[`${product.id}__${size}`]} disponibles)
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Box>
+                        )}
+
+                        {/* Cantidad */}
+                        <Box sx={{ mb: 3 }}>
+                            <Typography variant="subtitle1" gutterBottom>
+                                Cantidad
+                            </Typography>
+                            <TextField
+                                type="number"
+                                value={quantity}
+                                onChange={handleQuantityChange}
+                                inputProps={{
+                                    min: 1,
+                                    max: maxQuantity,
+                                    step: 1
+                                }}
+                                fullWidth
+                                disabled={!selectedSize || maxQuantity === 0}
+                            />
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                {selectedSize
+                                    ? `${product.inventory[`${product.id}__${selectedSize}`] || 0} disponibles`
+                                    : 'Selecciona una talla'}
+                            </Typography>
+                        </Box>
+
+                        {/* Botones de acción */}
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                            <IconButton
+                                aria-label="add to favorites"
+                                color="secondary"
+                                size="large"
+                                onClick={handleFavoriteClick}
+                            >
+                                {isFavorite(product.id) ? <Favorite /> : <FavoriteBorder />}
+                            </IconButton>
+                            <ShareButton
+                                productUrl={`${window.location.origin}/producto/${product.id}`}
+                                productName={product.name}
+                            />
+                            <Button
+                                variant="contained"
+                                size="large"
+                                startIcon={<AddShoppingCart />}
+                                fullWidth
+                                onClick={handleAddToCart}
+                                disabled={!selectedSize || maxQuantity === 0}
+                            >
+                                {maxQuantity === 0 ? 'Sin stock' : 'Añadir al carrito'}
+                            </Button>
+                        </Box>
                     </Box>
                 </Grid>
             </Grid>

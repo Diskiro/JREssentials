@@ -5,7 +5,7 @@
   },
   "hosting": [
     {
-      "site": "charysboutique",
+      "site": "jr-essentials",
       "public": "client/build",
       "ignore": [
         "firebase.json",

@@ -7,20 +7,20 @@ const About = () => {
         <Container maxWidth="lg" className={styles.container}>
             <Paper elevation={0} className={styles.content}>
                 <Typography variant="h2" component="h1" className={styles.mainTitle}>
-                    Sobre Chary's Boutique
+                    Sobre J&R Essentials
                 </Typography>
 
                 <Box className={styles.imageContainer}>
                     <img
                         src="/CharysBoutique.jpeg"
-                        alt="Chary's Boutique"
+                        alt="J&R Essentials"
                         className={styles.aboutImage}
                     />
                 </Box>
 
                 <Box className={styles.textContent}>
                     <Typography paragraph className={styles.paragraph}>
-                        En Chary's Boutique, creemos que la moda es sinónimo de confianza, comodidad y estilo sin límites. Somos un espacio dedicado a la mujer curvy, donde cada prenda está cuidadosamente seleccionada para resaltar tu belleza única y acompañarte en cada momento de tu vida.
+                        En J&R Essentials, creemos que la moda es sinónimo de confianza, comodidad y estilo sin límites. Somos un espacio dedicado a la mujer curvy, donde cada prenda está cuidadosamente seleccionada para resaltar tu belleza única y acompañarte en cada momento de tu vida.
                     </Typography>
 
                     <Typography paragraph className={styles.paragraph}>
@@ -44,7 +44,7 @@ const About = () => {
                     </Box>
 
                     <Typography paragraph className={styles.paragraph}>
-                        En Chary's Boutique, celebramos la diversidad y empoderamos a través de la moda. ¡Porque todas merecemos brillar con confianza!
+                        En J&R Essentials, celebramos la diversidad y empoderamos a través de la moda. ¡Porque todas merecemos brillar con confianza!
                     </Typography>
 
                     <Typography variant="h5" component="h3" className={styles.welcome}>

@@ -195,58 +195,7 @@ export default function ProductCard({ product: initialProduct }) {
                     {formatPrice(product.price)}
                 </Typography>
             </CardContent>
-            <CardActions className={styles.actions}>
-                <Box sx={{ width: '100%' }}>
-                    {availableSizes && availableSizes.length > 0 && (
-                        <FormControl fullWidth size="small" className={styles.sizeSelect}>
-                            <InputLabel id="size-label">Talla</InputLabel>
-                            <Select
-                                labelId="size-label"
-                                value={selectedSize}
-                                onChange={(e) => setSelectedSize(e.target.value)}
-                                label="Talla"
-                            >
-                                <MenuItem value="">
-                                    <em>Selecciona una talla</em>
-                                </MenuItem>
-                                {availableSizes.map((size) => {
-                                    const sizeKey = `${product.id}__${size}`;
-                                    const stock = product.inventory[sizeKey] || 0;
-                                    return (
-                                        <MenuItem key={size} value={size} disabled={stock === 0}>
-                                            {size} ({stock} disponibles)
-                                        </MenuItem>
-                                    );
-                                })}
-                            </Select>
-                        </FormControl>
-                    )}
-                    <Box className={styles.buttonContainer}>
-                        <IconButton 
-                            aria-label="add to favorites" 
-                            color="secondary"
-                            className={styles.favoriteButton}
-                            onClick={handleFavoriteClick}
-                        >
-                            {isFavorite(product.id) ? <Favorite /> : <FavoriteBorder />}
-                        </IconButton>
-                        <ShareButton 
-                            productUrl={`${window.location.origin}/producto/${product.id}`}
-                            productName={product.name}
-                        />
-                        <Button
-                            variant="contained"
-                            startIcon={<AddShoppingCart />}
-                            fullWidth
-                            onClick={handleAddToCart}
-                            disabled={!selectedSize || availableSizes.length === 0}
-                            className={styles.addToCartButton}
-                        >
-                            {availableSizes.length === 0 ? 'Sin stock' : 'Añadir al carrito'}
-                        </Button>
-                    </Box>
-                </Box>
-            </CardActions>
+            
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={6000}
