@@ -11,7 +11,7 @@ import { useFavorites } from '../../context/FavoritesContext';
 import { useNavigate } from 'react-router-dom';
 import { FavoritesProvider } from '../../context/FavoritesContext';
 import ShareButton from '../../components/ShareButton/ShareButton';
-import styles from './Product.module.css';
+import './Product.css';
 
 const ProductPageContent = () => {
     const { id } = useParams();
@@ -27,6 +27,10 @@ const ProductPageContent = () => {
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [loadedImages, setLoadedImages] = useState({});
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [id]);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -223,23 +227,19 @@ const ProductPageContent = () => {
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Grid container spacing={4}>
+            <Grid className="product-view" container spacing={4}>
                 {/* Galería de imágenes */}
-                <Grid item xs={12} md={6} sx={{
+                <Grid className="product-image-container" item xs={12} md={6} sx={{
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'flex-start'
                 }}>
-                    <Box sx={{
+                    <Box className="product-image" sx={{
                         width: '100%',
                         maxWidth: '600px',
                         position: 'relative',
                         '@media (min-width: 769px)': {
                             aspectRatio: '3/4',
-                            overflow: 'hidden'
-                        },
-                        '@media (max-width: 768px)': {
-                            aspectRatio: '1/1',
                             overflow: 'hidden'
                         }
                     }}>
@@ -258,7 +258,7 @@ const ProductPageContent = () => {
                                 <CircularProgress />
                             </Box>
                         )}
-                        <img
+                        <img className='img-product'
                             src={product.images[currentImageIndex]}
                             alt={product.name}
                             style={{
@@ -425,6 +425,7 @@ const ProductPageContent = () => {
                                 productName={product.name}
                             />
                             <Button
+                                className="add-to-cart-button button primary"
                                 variant="contained"
                                 size="large"
                                 startIcon={<AddShoppingCart />}

@@ -6,6 +6,7 @@ import { fetchProducts, fetchCategories } from '../../data';
 import styles from './HomePage.module.css';
 import { Link } from 'react-router-dom';
 import { FavoritesProvider } from '../../context/FavoritesContext';
+import './HomePage.css';
 
 export default function HomePage() {
     const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -65,21 +66,13 @@ export default function HomePage() {
         <FavoritesProvider>
             <Container maxWidth="xl" className={styles.homeContainer}>
                 {/* Banner promocional personalizado */}
-                <div className={styles.promoSection}>
+                <div className={styles.promoSection + " banner"}>
                     <Typography variant="h2" className={styles.promoTitle}>
                         J&R Essentials
                     </Typography>
                     <Typography variant="h5" className={styles.promoSubtitle}>
-                        Tu destino para moda y belleza: ropa curvy exclusiva y todo para tu belleza
+                        Brilla sin pedir permiso.
                     </Typography>
-                    <div className={styles.promoButtons}>
-                        <Button variant="contained" color="secondary" className={styles.promoBtnMain} href="/categorias">
-                            Ver Colección de Ropa
-                        </Button>
-                        <Button variant="outlined" color="secondary" className={styles.promoBtnAlt}>
-                            Accesorios de Uñas
-                        </Button>
-                    </div>
                 </div>
 
                 {/* Productos destacados */}
@@ -139,7 +132,7 @@ export default function HomePage() {
                 <Grid container spacing={4} className={styles.aboutSection}>
                     <Grid item xs={12} md={6} className={styles.aboutGridImage}>
                         <img
-                            src="/CharysBoutique.jpeg"
+                            src="/JR_Essentials.jpg"
                             alt="J&R Essentials"
                             className={styles.aboutImage}
                         />

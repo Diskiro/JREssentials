@@ -1,0 +1,37 @@
+/* Desktop */
+@media screen and (min-width: 768px) {
+    .product-view {
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .product-image {
+        max-height: 70vh;
+    }
+}
+
+.button.primary {
+    background-color: #333;
+    color: white;
+}
+
+.button.primary:hover {
+    background-color: var(--primary-color);
+}
+
+
+/* Mobile */
+@media screen and (max-width: 767px) {
+    .product-view {
+        flex-direction: column;
+    }
+
+    .product-image-container {
+        width: 100%;
+    }
+
+    .product-image {
+        aspect-ratio: 3 / 4;
+        overflow: hidden;
+    }
+}
