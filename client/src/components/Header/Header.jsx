@@ -84,7 +84,7 @@ const Header = () => {
         <>
             <InactivityHandler />
             <AppBar position="sticky" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #e0e0e0', backgroundColor: '#fff' }}>
-                <Toolbar sx={{ justifyContent: 'space-between' }}>
+                <Toolbar className="header-container" sx={{ justifyContent: 'space-between' }}>
                     {isMobile ? (
                         <>
                             <Box sx={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
@@ -132,7 +132,7 @@ const Header = () => {
                     ) : (
                         <>
                             <Link to="/" className="logo-link" style={{ display: 'flex', alignItems: 'center' }}>
-                                <img
+                                <img className="logo-desktop"
                                     src="/JR_Essentials.jpg"
                                     alt="J&R Essentials"
                                     style={{ width: '100px', height: '100px', objectFit: 'contain', marginRight: 8 }}

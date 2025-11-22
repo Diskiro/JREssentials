@@ -1,13 +1,12 @@
 import { Box, Container, Grid, Typography, Link, Divider, IconButton } from '@mui/material';
 import { Facebook, WhatsApp } from '@mui/icons-material';
+import './Footer.css';
 
 const Footer = () => {
     return (
-        <Box
+        <Box className="footer"
             component="footer"
             sx={{
-                backgroundColor: 'rgb(17 24 39)',
-                color: 'white',
                 py: 6,
                 mt: 'auto'
             }}
@@ -28,7 +27,7 @@ const Footer = () => {
                             <IconButton href="https://www.facebook.com/share/18uDVsd7Pa/" sx={{ color: 'white' }}>
                                 <Facebook />
                             </IconButton>
-                            <IconButton href="https://wa.me/527224992307" sx={{ color: 'white' }}>
+                            <IconButton href="https://wa.me/525559032017" sx={{ color: 'white' }}>
                                 <WhatsApp />
                             </IconButton>
                         </Box>
@@ -82,7 +81,7 @@ const Footer = () => {
                             Contacto
                         </Typography>
                         <Typography variant="body1" sx={{ mb: 2 }}>
-                            <Box component="span" sx={{ fontWeight: 'bold' }}>Teléfono:</Box> 7224992307
+                            <Box component="span" sx={{ fontWeight: 'bold' }}>Teléfono:</Box> 5559032017
                         </Typography>
                     </Grid>
                 </Grid>

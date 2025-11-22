@@ -4,6 +4,16 @@
   color: black;
 }
 
+.header-container {
+  background: #000;
+  color: #fff;
+
+}
+
+.logo-desktop{
+  margin: 10px 8px 10px 0;
+}
+
 .logo-link {
   text-decoration: none;
   color: inherit;
