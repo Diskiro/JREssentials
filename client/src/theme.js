@@ -3,36 +3,37 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#FF69B4', // Rosa suave
-      light: '#FFB6C1', // Rosa claro
-      dark: '#DB7093', // Rosa oscuro
+      main: '#333',
+      light: '#FFB6C1',
+      dark: '#000',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#9370DB', // Púrpura suave
-      light: '#E6E6FA', // Lavanda
-      dark: '#8A2BE2', // Púrpura oscuro
+      main: '#9370DB',
+      light: '#E6E6FA',
+      dark: '#8A2BE2',
       contrastText: '#FFFFFF',
     },
     background: {
-      default: '#fff', // Rosa muy claro
+      default: '#fff',
       paper: '#FFFFFF',
     },
     text: {
-      primary: '#4A4A4A', // Gris oscuro suave
-      secondary: '#666666', // Gris medio
+      primary: '#4A4A4A',
+      secondary: '#666666',
     },
     error: {
-      main: '#FF6B6B', // Rojo suave
+      main: '#FF6B6B',
     },
     warning: {
-      main: '#FFD700', // Dorado
+      main: '#FFD700',
+      red: '#da1616ff',
     },
     success: {
-      main: '#98FB98', // Verde suave
+      main: '#98FB98',
     },
     info: {
-      main: '#87CEEB', // Azul cielo
+      main: '#87CEEB',
     },
   },
   typography: {
@@ -201,4 +202,4 @@ export const theme = createTheme({
       xl: 1536,
     },
   },
-}); 
+});

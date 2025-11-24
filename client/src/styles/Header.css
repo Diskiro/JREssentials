@@ -1,0 +1,56 @@
+.header.MuiPaper-root.MuiPaper-elevation {
+  background-color: white;
+  border-radius: 0;
+  color: black;
+}
+
+.header-container {
+  background: #000;
+  color: #fff;
+}
+
+.cart-badge span {
+  background-color: var(--white);
+  color: var(--black);
+}
+
+.logo-desktop{
+  margin: 10px 8px 10px 0;
+}
+
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo {
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* Estilos para el título dinámico */
+.brand-title-wrapper {
+  background-color: white;
+  text-align: center;
+  overflow: hidden;
+  transition: all 0.4s ease-in-out;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.brand-title-wrapper.hidden {
+  height: 0;
+  opacity: 0;
+  border-bottom: none;
+}
+
+.brand-title-text {
+  font-family: 'Playfair Display', serif !important; /* Asegurar que use una fuente elegante si está disponible */
+  color: #000;
+  font-weight: bold !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase;
+}

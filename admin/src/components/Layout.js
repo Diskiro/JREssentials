@@ -24,6 +24,8 @@ import {
   Logout as LogoutIcon,
   People as PeopleIcon,
   SupervisorAccount as SupervisorAccountIcon,
+  ViewCarousel as BannersIcon,
+  LocalOffer as OfferIcon,
 } from '@mui/icons-material';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -40,6 +42,8 @@ const menuItems = [
   { text: 'Subir Productos', icon: <UploadIcon />, path: '/upload' },
   { text: 'Usuarios', icon: <PeopleIcon />, path: '/users' },
   { text: 'Administradores', icon: <SupervisorAccountIcon />, path: '/admin-users' },
+  { text: 'Banners', icon: <BannersIcon />, path: '/banners' },
+  { text: 'Códigos y Promociones', icon: <OfferIcon />, path: '/promotions' },
 ];
 
 function Layout() {

@@ -1,0 +1,90 @@
+.catalogContainer[class*="MuiContainer-root"] {
+    max-width: 1200px;
+}
+
+.catalogTitle {
+  /* Estilos para el título */
+}
+
+/* Selector más específico para la cuadrícula de categorías */
+.categoriesGrid[class*="MuiGrid-root"] {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Selector más específico para cada item de categoría */
+.categoryItem[class*="MuiGrid-item"] {
+  width: 100%;
+}
+
+/* Selector más específico para la cuadrícula de productos */
+.productsGrid[class*="MuiGrid-root"] {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+/* Selector más específico para cada item de producto */
+.productItem[class*="MuiGrid-item"] {
+  width: 100%;
+}
+
+/* Media queries para responsividad */
+@media (min-width: 600px) {
+  .categoriesGrid[class*="MuiGrid-root"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .productsGrid[class*="MuiGrid-root"] {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .categoriesGrid[class*="MuiGrid-root"] {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .productsGrid[class*="MuiGrid-root"] {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.loadingContainer {
+  /* Estilos para el contenedor de carga */
+}
+
+.noProductsMessage {
+  /* Estilos para el mensaje de no hay productos */
+}
+
+.loadMoreButton {
+  /* Estilos para el botón de cargar más */
+}
+
+.loadMoreContainer {
+  /* Estilos para el contenedor del botón de cargar más */
+}
+
+.paginationContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.paginationContainer :global(.MuiPaginationItem-root) {
+    font-size: 1.1rem;
+    margin: 0 4px;
+}
+
+.paginationContainer :global(.MuiPaginationItem-root.Mui-selected) {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.paginationContainer :global(.MuiPaginationItem-root.Mui-selected:hover) {
+    background-color: var(--primary-color-dark);
+}

@@ -1,0 +1,11 @@
+@media screen and (max-width: 1041px) {
+    .cart-container {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 450px) {
+    .cart-summary {
+        width: 100%;
+    }
+}
