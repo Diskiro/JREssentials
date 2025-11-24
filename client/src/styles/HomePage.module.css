@@ -1,6 +1,6 @@
 .homeContainer[class*="MuiContainer-root"] {
   padding: 2rem 16px;
-  max-width: 1200px;
+  max-width: none;
 }
 
 .banner {
@@ -70,7 +70,7 @@
 
 .aboutButton {
   padding: 0.75rem 2rem;
-  font-weight: 500;
+  font-weight: 100;
 }
 
 /* Media queries para responsividad */

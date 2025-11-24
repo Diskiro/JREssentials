@@ -12,7 +12,7 @@ import {
     Grid
 } from '@mui/material';
 import { useAuth } from '../../context/auth/useAuth';
-import styles from './Register.module.css';
+import styles from '../../styles/Register.module.css';
 
 export function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -84,7 +84,7 @@ export function RegisterPage() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        
+
         // Si es el campo de teléfono, solo permitir números
         if (name === 'phone') {
             const numericValue = value.replace(/[^0-9]/g, '');
@@ -110,7 +110,7 @@ export function RegisterPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
             return;
         }
@@ -214,7 +214,7 @@ export function RegisterPage() {
                                 error={!!errors.phone}
                                 helperText={errors.phone}
                                 required
-                                inputProps={{ 
+                                inputProps={{
                                     maxLength: 10,
                                     inputMode: 'numeric',
                                     pattern: '[0-9]*'

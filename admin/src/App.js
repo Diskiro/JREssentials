@@ -14,6 +14,8 @@ import UploadProducts from './pages/UploadProducts';
 import Users from './pages/Users';
 import AdminUsers from './pages/AdminUsers';
 import RegisterAdmin from './pages/RegisterAdmin';
+import Banners from './pages/Banners';
+import Promotions from './pages/Promotions';
 
 
 function ProtectedRoute({ children }) {
@@ -54,6 +56,8 @@ function App() {
                             <Route path="upload" element={<UploadProducts />} />
                             <Route path="users" element={<Users />} />
                             <Route path="admin-users" element={<AdminUsers />} />
+                            <Route path="banners" element={<Banners />} />
+                            <Route path="promotions" element={<Promotions />} />
                         </Route>
                     </Routes>
                 </Router>

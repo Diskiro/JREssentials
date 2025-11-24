@@ -11,7 +11,7 @@ import { useFavorites } from '../../context/FavoritesContext';
 import { useNavigate } from 'react-router-dom';
 import { FavoritesProvider } from '../../context/FavoritesContext';
 import ShareButton from '../../components/ShareButton/ShareButton';
-import './Product.css';
+import '../../styles/Product.css';
 
 const ProductPageContent = () => {
     const { id } = useParams();

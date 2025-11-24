@@ -10,15 +10,6 @@
     }
 }
 
-.button.primary {
-    background-color: #333;
-    color: white;
-}
-
-.button.primary:hover {
-    background-color: var(--primary-color);
-}
-
 
 /* Mobile */
 @media screen and (max-width: 767px) {
