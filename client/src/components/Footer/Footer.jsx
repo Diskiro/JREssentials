@@ -1,8 +1,31 @@
+import { useState, useEffect } from 'react';
 import { Box, Container, Grid, Typography, Link, Divider, IconButton } from '@mui/material';
-import { Facebook, WhatsApp } from '@mui/icons-material';
-import './Footer.css';
+import { Facebook, WhatsApp, Instagram } from '@mui/icons-material';
+import { db } from '../../firebase';
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import '../../styles/Footer.css';
 
 const Footer = () => {
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const q = query(collection(db, 'categories'), orderBy('order', 'asc'), limit(4));
+                const querySnapshot = await getDocs(q);
+                const categoriesList = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setCategories(categoriesList);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     return (
         <Box className="footer"
             component="footer"
@@ -19,15 +42,15 @@ const Footer = () => {
                             J&R Essentials
                         </Typography>
                         <Typography variant="body1" sx={{ mb: 2 }}>
-                            Tu destino para moda femenina: ropa exclusiva y accesorios elegantes.
+                            Brilla sin pedir permiso.
                         </Typography>
 
                         {/* Redes sociales */}
                         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                            <IconButton href="https://www.facebook.com/share/18uDVsd7Pa/" sx={{ color: 'white' }}>
-                                <Facebook />
+                            <IconButton href="https://www.instagram.com/jyressentials/" target="_blank" sx={{ color: 'white' }}>
+                                <Instagram />
                             </IconButton>
-                            <IconButton href="https://wa.me/525559032017" sx={{ color: 'white' }}>
+                            <IconButton href="https://wa.me/525559032017" target="_blank" sx={{ color: 'white' }}>
                                 <WhatsApp />
                             </IconButton>
                         </Box>
@@ -39,18 +62,24 @@ const Footer = () => {
                             Categorías
                         </Typography>
                         <Box component="nav">
-                            <Link href="/catalogo?category=vestidos" color="inherit" underline="hover" display="block" sx={{ mb: 1 }}>
-                                Vestidos
-                            </Link>
-                            <Link href="/catalogo?category=blusas" color="inherit" underline="hover" display="block" sx={{ mb: 1 }}>
-                                Blusas
-                            </Link>
-                            <Link href="/catalogo?category=pantalones" color="inherit" underline="hover" display="block" sx={{ mb: 1 }}>
-                                Pantalones
-                            </Link>
-                            <Link href="/accessories" color="inherit" underline="hover" display="block">
-                                Accesorios
-                            </Link>
+                            {categories.length > 0 ? (
+                                categories.map((category) => (
+                                    <Link
+                                        key={category.id}
+                                        href={`/catalogo?category=${category.name}`}
+                                        color="inherit"
+                                        underline="hover"
+                                        display="block"
+                                        sx={{ mb: 1 }}
+                                    >
+                                        {category.name}
+                                    </Link>
+                                ))
+                            ) : (
+                                <Typography variant="body2" color="inherit">
+                                    Cargando...
+                                </Typography>
+                            )}
                         </Box>
                     </Grid>
 

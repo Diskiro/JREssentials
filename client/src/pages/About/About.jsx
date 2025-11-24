@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Typography, Box, Paper } from '@mui/material';
-import styles from './About.module.css';
+import styles from '../../styles/About.module.css';
 
 const About = () => {
     return (

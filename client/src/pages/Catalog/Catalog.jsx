@@ -7,7 +7,7 @@ import { db } from '../../firebase';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { normalizeCategoryName } from '../../utils/categoryUtils';
 import { formatPrice } from '../../utils/priceUtils';
-import styles from './Catalog.module.css';
+import styles from '../../styles/Catalog.module.css';
 import { FavoritesProvider } from '../../context/FavoritesContext';
 
 export default function CatalogPage() {
@@ -24,7 +24,7 @@ export default function CatalogPage() {
     useEffect(() => {
         if (!loading && products.length > 0) {
             const savedPosition = parseInt(localStorage.getItem(`scroll_position_${category}`)) || 0;
-            
+
             if (savedPosition > 0) {
                 setTimeout(() => {
                     window.scrollTo({
@@ -42,7 +42,7 @@ export default function CatalogPage() {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                
+
                 if (!category) {
                     // Si no hay categoría, cargar todas las categorías
                     const q = query(collection(db, 'categories'), orderBy('order', 'asc'));
@@ -73,7 +73,7 @@ export default function CatalogPage() {
                 // Filtrar productos que tienen al menos una talla con stock
                 const productsWithStock = productsList.filter(product => {
                     if (!product.inventory) return false;
-                    
+
                     const totalStock = Object.values(product.inventory).reduce((sum, stock) => sum + stock, 0);
                     return totalStock > 0;
                 });
@@ -161,13 +161,13 @@ export default function CatalogPage() {
 
                 {totalPages > 1 && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
-                        <Pagination 
-                            count={totalPages} 
-                            page={page} 
+                        <Pagination
+                            count={totalPages}
+                            page={page}
                             onChange={handlePageChange}
                             color="primary"
                             size="large"
-                            showFirstButton 
+                            showFirstButton
                             showLastButton
                         />
                     </Box>

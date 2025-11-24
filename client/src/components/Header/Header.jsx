@@ -19,7 +19,7 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import './Header.css';
+import '../../styles/Header.css';
 import InactivityHandler from '../InactivityHandler/InactivityHandler';
 
 const Header = () => {
@@ -113,7 +113,7 @@ const Header = () => {
                                     component={Link}
                                     to="/cart"
                                 >
-                                    <Badge badgeContent={cart.length} color="error">
+                                    <Badge badgeContent={cart.length} className="cart-badge">
                                         <ShoppingCartIcon />
                                     </Badge>
                                 </IconButton>

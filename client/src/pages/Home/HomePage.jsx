@@ -3,10 +3,11 @@ import { Container, Grid, Typography, Button, Box, CircularProgress } from '@mui
 import ProductCard from '../../components/ProductCard/ProductCard';
 import CategoryCard from '../../components/CategoryCard/CategoryCard';
 import { fetchProducts, fetchCategories } from '../../data';
-import styles from './HomePage.module.css';
+import styles from '../../styles/HomePage.module.css';
 import { Link } from 'react-router-dom';
 import { FavoritesProvider } from '../../context/FavoritesContext';
-import './HomePage.css';
+import '../../styles/HomePage.css';
+import DynamicBanner from '../../components/Banner/DynamicBanner';
 
 export default function HomePage() {
     const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -65,6 +66,9 @@ export default function HomePage() {
     return (
         <FavoritesProvider>
             <Container maxWidth="xl" className={styles.homeContainer}>
+                {/* Banner Dinámico */}
+                <DynamicBanner />
+
                 {/* Banner promocional personalizado */}
                 <div className={styles.promoSection + " banner"}>
                     <Typography variant="h2" className={styles.promoTitle}>
@@ -142,12 +146,12 @@ export default function HomePage() {
                             Nuestra Marca
                         </Typography>
                         <Typography paragraph className={styles.aboutText}>
-                            J&R Essentials nació con la pasión por ofrecer moda accesible y de calidad...
+                            En J&R Essentials creemos que cada persona merece brillar a su manera. Nacimos con la idea de ofrecer accesorios modernos y llenos de estilo, seleccionados para realzar tu personalidad y acompañarte en cada momento. Nuestra esencia combina elegancia juvenil, moda actual y ese toque especial que convierte cualquier detalle en parte de tu identidad.
                         </Typography>
                         <Button
                             variant="contained"
                             color="primary"
-                            className={styles.aboutButton}
+                            className={`${styles.aboutButton} button primary`}
                             component={Link}
                             to="/about"
                         >

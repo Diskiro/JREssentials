@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Container, Grid, Typography } from '@mui/material';
 import CategoryCard from '../../components/CategoryCard/CategoryCard';
 import { fetchCategories } from '../../data';
-import styles from './CategoriesPage.module.css';
+import styles from '../../styles/CategoriesPage.module.css';
 
 export default function CategoriesPage() {
     const [categories, setCategories] = useState([]);

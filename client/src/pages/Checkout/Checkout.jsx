@@ -43,7 +43,7 @@ export default function CheckoutPage() {
         metroStation: ''
     });
     const { user } = useAuth();
-    const { cart, getTotalPrice, clearCart } = useCart();
+    const { cart, getTotalPrice, clearCart, getSubtotal, getDiscountAmount, promoCode } = useCart();
     const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -108,12 +108,12 @@ export default function CheckoutPage() {
                 // Obtener o crear el contador de pedidos del usuario
                 const userOrdersCounterRef = doc(db, 'userOrdersCounters', user.uid);
                 const counterDoc = await transaction.get(userOrdersCounterRef);
-                
+
                 let orderNumber = 1;
                 if (counterDoc.exists()) {
                     orderNumber = counterDoc.data().count + 1;
                 }
-                
+
                 // Crear el ID del pedido
                 const orderId = `${user.uid}__orden${orderNumber}`;
                 newOrderRef = doc(db, 'orders', orderId);
@@ -128,7 +128,14 @@ export default function CheckoutPage() {
                     metroStation: user.metroStation || '',
                     paymentMethod: paymentMethod,
                     items: cart,
+                    subtotal: getSubtotal(),
+                    discount: getDiscountAmount(),
+                    shippingCost: shipping,
                     totalAmount: total,
+                    promoCode: promoCode ? {
+                        code: promoCode.code,
+                        discountPercentage: promoCode.discountPercentage
+                    } : null,
                     status: 'Pendiente',
                     confirmed: false,
                     createdAt: Timestamp.now()
@@ -136,7 +143,7 @@ export default function CheckoutPage() {
 
                 // Crear el pedido
                 transaction.set(newOrderRef, orderData);
-                
+
                 // Actualizar el contador de pedidos del usuario
                 transaction.set(userOrdersCounterRef, { count: orderNumber }, { merge: true });
 
@@ -149,17 +156,25 @@ export default function CheckoutPage() {
 
                     const productRef = doc(db, 'products', item.productId);
                     const sizeKey = item.size;
-                    
-                    transaction.update(productRef, { 
-                        [`inventory.${sizeKey}`]: increment(-item.quantity) 
+
+                    transaction.update(productRef, {
+                        [`inventory.${sizeKey}`]: increment(-item.quantity)
+                    });
+                }
+
+                // Update promo code usage if applied
+                if (promoCode) {
+                    const promoRef = doc(db, 'promocodes', promoCode.id);
+                    transaction.update(promoRef, {
+                        usageCount: increment(1)
                     });
                 }
             });
 
             setSnackbar({ open: true, message: 'Pedido realizado con éxito.', severity: 'success' });
             await clearCart();
-            navigate('/confirmation', { 
-                state: { 
+            navigate('/confirmation', {
+                state: {
                     order: {
                         id: newOrderRef.id,
                         userId: user.uid,
@@ -170,13 +185,15 @@ export default function CheckoutPage() {
                         metroStation: user.metroStation || '',
                         paymentMethod: paymentMethod,
                         items: cart,
-                        subtotal: subtotal,
+                        subtotal: getSubtotal(),
+                        discount: getDiscountAmount(),
                         shippingCost: shipping,
                         total: total,
+                        promoCode: promoCode,
                         createdAt: new Date().toISOString(),
                         status: 'pending'
                     }
-                } 
+                }
             });
 
         } catch (error) {
@@ -187,9 +204,10 @@ export default function CheckoutPage() {
         }
     };
 
-    const subtotal = getTotalPrice();
+    const subtotal = getSubtotal ? getSubtotal() : getTotalPrice();
     const shipping = 40;
-    const total = subtotal + shipping;
+    const discount = getDiscountAmount ? getDiscountAmount() : 0;
+    const total = getTotalPrice();
 
     const getSizeOnly = (size) => {
         return size ? size.split('__')[1] : '';
@@ -217,9 +235,9 @@ export default function CheckoutPage() {
                                 <Typography variant="subtitle1" gutterBottom>
                                     Método de envío
                                 </Typography>
-                                <Box sx={{ 
-                                    p: 2, 
-                                    bgcolor: 'primary.light', 
+                                <Box sx={{
+                                    p: 2,
+                                    bgcolor: 'primary.dark',
                                     borderRadius: 1,
                                     color: 'white',
                                     mb: 2
@@ -235,10 +253,10 @@ export default function CheckoutPage() {
                                         color="success"
                                         startIcon={<WhatsAppIcon />}
                                         component={MuiLink}
-                                        href="https://wa.me/527224992307"
+                                        href="https://wa.me/525559032017"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        sx={{ 
+                                        sx={{
                                             textTransform: 'none',
                                             bgcolor: '#25D366',
                                             '&:hover': {
@@ -323,23 +341,23 @@ export default function CheckoutPage() {
                                             Datos para transferencia:
                                         </Typography>
                                         <Typography variant="body2" sx={{ mt: 1 }}>
-                                            <strong>Nombre:</strong> Arlenne Medel Mayen
+                                            <strong>Nombre:</strong> Ruby Jazmin Marin Carrasco
                                         </Typography>
                                         <Typography variant="body2">
-                                            <strong>Banco:</strong> Banamex
+                                            <strong>Banco:</strong> Nubank
                                         </Typography>
                                         <Typography variant="body2">
-                                            <strong>No de Tarjeta:</strong> 5204 1658 9896 0293
+                                            <strong>No de Tarjeta:</strong> 5101 2547 2180 3766
                                         </Typography>
-                                        <Typography variant="body2" sx={{ mt: 1 }}>
-                                            <strong>Nombre:</strong> Arlenne Medel Mayen
+                                        {/* <Typography variant="body2" sx={{ mt: 1 }}>
+                                            <strong>Nombre:</strong> Ruby Jazmin Marin Carrasco
                                         </Typography>
                                         <Typography variant="body2">
                                             <strong>Banco:</strong> BBVA
                                         </Typography>
                                         <Typography variant="body2">
                                             <strong>No de Cuenta:</strong> 4152 3138 5301 8351
-                                        </Typography>
+                                        </Typography> */}
                                     </Box>
                                 )}
 
@@ -421,6 +439,12 @@ export default function CheckoutPage() {
                                 <Typography>Subtotal:</Typography>
                                 <Typography>{formatPrice(subtotal)}</Typography>
                             </Box>
+                            {promoCode && (
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', color: 'success.main' }}>
+                                    <Typography>Descuento ({promoCode.discountPercentage}%):</Typography>
+                                    <Typography>-{formatPrice(discount)}</Typography>
+                                </Box>
+                            )}
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                                 <Typography>Envío:</Typography>
                                 <Typography>{formatPrice(shipping)}</Typography>
@@ -430,10 +454,10 @@ export default function CheckoutPage() {
                                 <Typography variant="h6">{formatPrice(total)}</Typography>
                             </Box>
 
-                            <Box sx={{ 
-                                mt: 3, 
-                                p: 2, 
-                                bgcolor: '#f5f5f5', 
+                            <Box sx={{
+                                mt: 3,
+                                p: 2,
+                                bgcolor: '#f5f5f5',
                                 borderRadius: 1,
                                 border: '1px dashed #9e9e9e'
                             }}>
@@ -445,10 +469,10 @@ export default function CheckoutPage() {
                                     color="success"
                                     startIcon={<WhatsAppIcon />}
                                     component={MuiLink}
-                                    href="https://wa.me/527224992307"
+                                    href="https://wa.me/525559032017"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    sx={{ 
+                                    sx={{
                                         textTransform: 'none',
                                         bgcolor: '#25D366',
                                         '&:hover': {
@@ -516,6 +540,12 @@ export default function CheckoutPage() {
                             <Typography>Subtotal:</Typography>
                             <Typography>{formatPrice(subtotal)}</Typography>
                         </Box>
+                        {promoCode && (
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, color: 'success.main' }}>
+                                <Typography>Descuento ({promoCode.discountPercentage}%):</Typography>
+                                <Typography>-{formatPrice(discount)}</Typography>
+                            </Box>
+                        )}
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                             <Typography>Envío:</Typography>
                             <Typography>{formatPrice(shipping)}</Typography>
@@ -525,7 +555,7 @@ export default function CheckoutPage() {
 
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                             <Typography variant="h6">Total:</Typography>
-                            <Typography variant="h6">{formatPrice(total)}</Typography>
+                            <Typography variant="h6">{formatPrice(total + shipping)}</Typography>
                         </Box>
                     </Paper>
                 </Grid>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Typography, Box, Paper } from '@mui/material';
-import styles from './Accessories.module.css';
+import styles from '../../styles/Accessories.module.css';
 
 const Accessories = () => {
     return (

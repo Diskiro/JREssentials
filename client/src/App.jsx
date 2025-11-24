@@ -25,7 +25,7 @@ import Terms from './pages/Terms/Terms';
 import Privacy from './pages/Privacy/Privacy';
 import NotFound from './pages/NotFound/NotFound';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
-import './App.css';
+import './styles/App.css';
 
 function App() {
     return (

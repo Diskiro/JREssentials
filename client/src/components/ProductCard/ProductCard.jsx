@@ -22,7 +22,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { formatPrice } from '../../utils/priceUtils';
 import PropTypes from 'prop-types';
-import styles from './ProductCard.module.css';
+import styles from '../../styles/ProductCard.module.css';
 import { db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import ShareButton from '../ShareButton/ShareButton';
@@ -51,8 +51,8 @@ export default function ProductCard({ product: initialProduct }) {
                 const productDoc = await getDoc(doc(db, 'products', initialProduct.id));
                 if (productDoc.exists()) {
                     const data = productDoc.data();
-                    setProduct({ 
-                        id: productDoc.id, 
+                    setProduct({
+                        id: productDoc.id,
                         ...data,
                         images: Array.isArray(data.images) ? data.images : [],
                         inventory: data.inventory || {}
@@ -67,7 +67,7 @@ export default function ProductCard({ product: initialProduct }) {
     }, [initialProduct.id]);
 
     const mainImage = product.images?.[0] || '/assets/placeholder.jpg';
-    
+
     // Obtener las tallas disponibles del inventario
     const availableSizes = Object.entries(product.inventory || {})
         .filter(([_, stock]) => stock > 0)
@@ -178,14 +178,14 @@ export default function ProductCard({ product: initialProduct }) {
                 />
             </Box>
             <CardContent className={styles.content}>
-                <Typography 
+                <Typography
                     className={styles.title}
                 >
                     {product.name}
                 </Typography>
-                <Typography 
+                <Typography
                     className={styles.description}
-                    sx={{ 
+                    sx={{
                         whiteSpace: 'pre-line'
                     }}
                 >
@@ -195,7 +195,7 @@ export default function ProductCard({ product: initialProduct }) {
                     {formatPrice(product.price)}
                 </Typography>
             </CardContent>
-            
+
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={6000}
