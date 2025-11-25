@@ -266,12 +266,12 @@ function Products() {
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
-    
+
     if (active.id !== over.id) {
       setFormData((prevData) => {
         const oldIndex = prevData.images.indexOf(active.id);
         const newIndex = prevData.images.indexOf(over.id);
-        
+
         return {
           ...prevData,
           images: arrayMove(prevData.images, oldIndex, newIndex)
@@ -282,7 +282,7 @@ function Products() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validar campos requeridos
     if (!formData.name.trim()) {
       alert('El nombre del producto es obligatorio');
@@ -306,7 +306,7 @@ function Products() {
         ...formData,
         price: parseFloat(formData.price)
       };
-      
+
       if (selectedProduct) {
         const filteredInventory = Object.entries(productData.inventory).reduce((acc, [key, value]) => {
           if (value > 0) {
@@ -314,7 +314,7 @@ function Products() {
           }
           return acc;
         }, {});
-        
+
         await updateDoc(doc(db, 'products', selectedProduct.id), {
           ...productData,
           inventory: filteredInventory
@@ -324,7 +324,7 @@ function Products() {
           ...productData,
           inventory: {}
         });
-        
+
         const formattedInventory = AVAILABLE_SIZES.reduce((acc, size) => {
           const stock = formData.inventory[`new__${size}`] || 0;
           if (stock > 0) {
@@ -332,7 +332,7 @@ function Products() {
           }
           return acc;
         }, {});
-        
+
         await updateDoc(docRef, {
           inventory: formattedInventory
         });
@@ -433,7 +433,7 @@ function Products() {
         product.sku
       ];
 
-      return searchFields.some(field => 
+      return searchFields.some(field =>
         field && field.toString().toLowerCase().includes(searchValue)
       );
     });
@@ -500,7 +500,18 @@ function Products() {
                 <TableCell>{product.description}</TableCell>
                 <TableCell>{product.category}</TableCell>
                 <TableCell>
-                  {Array.isArray(product.images) ? product.images.length : 1} imagen(es)
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                    {product.images && product.images.length > 0 && (
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 4 }}
+                      />
+                    )}
+                    <Typography variant="body2">
+                      {Array.isArray(product.images) ? product.images.length : 1} imagen(es)
+                    </Typography>
+                  </Box>
                 </TableCell>
                 <TableCell>
                   {AVAILABLE_SIZES.map(size => {
@@ -591,8 +602,8 @@ function Products() {
                 placeholder="Ingresa las URLs de las imágenes separadas por comas o saltos de línea"
                 helperText="Puedes agregar múltiples URLs separadas por comas o saltos de línea"
               />
-              <Button 
-                onClick={handleAddImage} 
+              <Button
+                onClick={handleAddImage}
                 variant="contained"
                 disabled={!newImage.trim()}
               >
