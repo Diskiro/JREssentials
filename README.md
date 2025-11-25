@@ -119,7 +119,7 @@ npm run serve
 ```bash
 cd client
 npm run build
-firebase deploy --only hosting:client
+firebase deploy --only hosting:jr-essentials
 ```
 
 ### Panel de Administración
