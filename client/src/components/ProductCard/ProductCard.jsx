@@ -2,21 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Card,
-    CardMedia,
     CardContent,
-    CardActions,
     Typography,
-    Button,
     Box,
-    IconButton,
     Snackbar,
-    Alert,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel
+    Alert
 } from '@mui/material';
-import { AddShoppingCart, FavoriteBorder, Favorite } from '@mui/icons-material';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
@@ -25,7 +16,7 @@ import PropTypes from 'prop-types';
 import styles from '../../styles/ProductCard.module.css';
 import { db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import ShareButton from '../ShareButton/ShareButton';
+import OptimizedImage from '../OptimizedImage/OptimizedImage';
 
 export default function ProductCard({ product: initialProduct }) {
     const navigate = useNavigate();
@@ -166,15 +157,11 @@ export default function ProductCard({ product: initialProduct }) {
     return (
         <Card className={styles.productCard}>
             <Box className={styles.imageContainer}>
-                <CardMedia
-                    component="img"
-                    image={mainImage}
+                <OptimizedImage
+                    src={mainImage}
                     alt={product.name}
                     className={styles.productImage}
                     onClick={() => navigate(`/producto/${product.id}`, { replace: false })}
-                    onError={(e) => {
-                        e.target.src = '/assets/placeholder.jpg';
-                    }}
                 />
             </Box>
             <CardContent className={styles.content}>

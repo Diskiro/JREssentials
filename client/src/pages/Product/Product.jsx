@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { FavoritesProvider } from '../../context/FavoritesContext';
 import ShareButton from '../../components/ShareButton/ShareButton';
 import '../../styles/Product.css';
+import OptimizedImage from '../../components/OptimizedImage/OptimizedImage';
 
 const ProductPageContent = () => {
     const { id } = useParams();
@@ -258,7 +259,7 @@ const ProductPageContent = () => {
                                 <CircularProgress />
                             </Box>
                         )}
-                        <img className='img-product'
+                        <OptimizedImage className="product-image"
                             src={product.images[currentImageIndex]}
                             alt={product.name}
                             style={{
