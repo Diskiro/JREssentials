@@ -27,6 +27,7 @@ import { useAuth } from '../../context/AuthContext';
 import { formatPrice } from '../../utils/priceUtils';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import OptimizedImage from '../../components/OptimizedImage/OptimizedImage';
 import '../../styles/Cart.css';
 
 const Cart = () => {
@@ -156,7 +157,7 @@ const Cart = () => {
                             {cart.map((item) => (
                                 <Paper key={`${item.productId}_${item.size}`} sx={{ mb: 2, p: 2 }}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                        <img
+                                        <OptimizedImage
                                             src={item.image}
                                             alt={item.name}
                                             style={{ width: 60, height: 60, objectFit: 'cover', marginRight: 16, borderRadius: 8 }}
@@ -198,7 +199,7 @@ const Cart = () => {
                                         <TableRow key={item.size}>
                                             <TableCell>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                                    <img
+                                                    <OptimizedImage
                                                         src={item.image}
                                                         alt={item.name}
                                                         style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }}

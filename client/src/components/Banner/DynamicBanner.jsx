@@ -3,6 +3,7 @@ import { Box, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
+import OptimizedImage from '../OptimizedImage/OptimizedImage';
 import '../../styles/DynamicBanner.css';
 
 
@@ -58,11 +59,20 @@ const DynamicBanner = () => {
                 <div
                     key={banner.id}
                     className={`banner-slide ${index === activeStep ? 'active' : ''}`}
-                    style={{
-                        backgroundImage: `url(${isMobile && banner.mobileImageUrl ? banner.mobileImageUrl : banner.imageUrl})`
-                    }}
                 >
-
+                    <OptimizedImage
+                        src={isMobile && banner.mobileImageUrl ? banner.mobileImageUrl : banner.imageUrl}
+                        alt="Banner"
+                        className="banner-image"
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0
+                        }}
+                    />
                 </div>
             ))}
 

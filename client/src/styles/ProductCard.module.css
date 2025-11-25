@@ -10,7 +10,6 @@
   border-radius: 8px;
   overflow: hidden;
   background: white;
-  background-color: red
 }
 
 .productCard:hover {
@@ -113,12 +112,22 @@
   .price {
     font-size: 1rem;
   }
+
+  .imageContainer {
+    height: 25vh;
+  }
+
+  .productImage {
+    border-radius: 0;
+    padding: 0;
+  }
 }
 
 /* Animación de hover para la imagen */
 .productImage {
   transition: transform 0.3s ease;
-  border-radius: 30px;
+  border-radius: 0;
+  padding: 0;
 }
 
 .productCard:hover .productImage {
