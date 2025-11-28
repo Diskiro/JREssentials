@@ -102,16 +102,23 @@ const ProductPageContent = () => {
     };
 
     const handleAddToCart = async () => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
         if (!selectedSize) {
             setSnackbar({
                 open: true,
                 message: 'Por favor selecciona una talla',
                 severity: 'error'
             });
+            return;
+        }
+
+        if (!user) {
+            const pendingItem = {
+                product,
+                size: selectedSize,
+                quantity
+            };
+            localStorage.setItem('pendingCartItem', JSON.stringify(pendingItem));
+            navigate('/login');
             return;
         }
 

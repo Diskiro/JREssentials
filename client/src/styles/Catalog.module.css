@@ -23,7 +23,7 @@
 .productsGrid[class*="MuiGrid-root"] {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
+  gap: .8rem;
 }
 
 /* Selector más específico para cada item de producto */

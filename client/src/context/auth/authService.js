@@ -1,32 +1,39 @@
-import { db } from '../../firebase';
-import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
-import { auth } from '../../firebase';
+import { db, auth } from '../../firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut,
+    sendPasswordResetEmail
+} from 'firebase/auth';
 
 export const loginService = async (email, password) => {
     try {
-        const usersQuery = query(
-            collection(db, 'storeUsers'),
-            where('email', '==', email)
-        );
-        const usersSnapshot = await getDocs(usersQuery);
-        
-        if (!usersSnapshot.empty) {
-            const userDoc = usersSnapshot.docs[0];
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Obtener datos adicionales del usuario desde Firestore
+        const userDoc = await getDoc(doc(db, 'storeUsers', user.uid));
+
+        if (userDoc.exists()) {
             const userData = userDoc.data();
-            
-            if (userData.password === password) {
-                return {
-                    uid: userDoc.id,
-                    email: userData.email,
-                    firstName: userData.firstName,
-                    lastName: userData.lastName,
-                    phone: userData.phone,
-                    metroStation: userData.metroStation,
-                    role: userData.role
-                };
-            }
+            return {
+                uid: user.uid,
+                email: user.email,
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                phone: userData.phone,
+                metroStation: userData.metroStation,
+                role: userData.role
+            };
+        } else {
+            // Si el usuario existe en Auth pero no en Firestore (caso raro o nuevo)
+            return {
+                uid: user.uid,
+                email: user.email,
+                role: 'customer'
+            };
         }
-        throw new Error('Credenciales inválidas');
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
         throw error;
@@ -35,32 +42,28 @@ export const loginService = async (email, password) => {
 
 export const registerService = async (userData) => {
     try {
-        const usersQuery = query(
-            collection(db, 'storeUsers'),
-            where('email', '==', userData.email)
-        );
-        const usersSnapshot = await getDocs(usersQuery);
-        
-        if (!usersSnapshot.empty) {
-            throw new Error('El email ya está registrado');
-        }
+        const { email, password, firstName, lastName, phone, metroStation } = userData;
+
+        // Crear usuario en Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
         const newUser = {
-            ...userData,
+            email,
+            firstName,
+            lastName,
+            phone,
+            metroStation,
             createdAt: new Date().toISOString(),
             role: 'customer'
         };
 
-        const docRef = await addDoc(collection(db, 'storeUsers'), newUser);
-        
+        // Guardar datos adicionales en Firestore usando el UID de Auth
+        await setDoc(doc(db, 'storeUsers', user.uid), newUser);
+
         return {
-            uid: docRef.id,
-            email: newUser.email,
-            firstName: newUser.firstName,
-            lastName: newUser.lastName,
-            phone: newUser.phone,
-            metroStation: newUser.metroStation,
-            role: newUser.role
+            uid: user.uid,
+            ...newUser
         };
     } catch (error) {
         console.error('Error al registrar:', error);
@@ -70,7 +73,7 @@ export const registerService = async (userData) => {
 
 export const logoutService = async () => {
     try {
-        await auth.signOut();
+        await signOut(auth);
         return true;
     } catch (error) {
         console.error('Error al cerrar sesión:', error);
@@ -78,15 +81,27 @@ export const logoutService = async () => {
     }
 };
 
+export const sendPasswordResetEmailService = async (email) => {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        return true;
+    } catch (error) {
+        console.error('Error al enviar correo de recuperación:', error);
+        throw error;
+    }
+};
+
+// Ya no necesitamos guardar manualmente en localStorage para la persistencia de sesión básica,
+// pero podríamos querer guardar el perfil del usuario para acceso rápido.
 export const saveUserToLocalStorage = (userData) => {
     if (userData) {
-        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('user_profile', JSON.stringify(userData));
     } else {
-        localStorage.removeItem('user');
+        localStorage.removeItem('user_profile');
     }
 };
 
 export const loadUserFromLocalStorage = () => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem('user_profile');
     return storedUser ? JSON.parse(storedUser) : null;
-}; 
+};

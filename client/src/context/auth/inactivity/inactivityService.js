@@ -4,8 +4,12 @@ export const checkInactivity = async (lastActivity, user, onLogout) => {
     const currentTime = Date.now();
     const lastActivityLS = parseInt(localStorage.getItem('lastActivity') || currentTime);
 
-    if (currentTime - lastActivityLS > INACTIVITY_TIMEOUT && user) {
+    // Calcular tiempo transcurrido desde la última actividad
+    const timeElapsed = currentTime - lastActivityLS;
+
+    if (timeElapsed > INACTIVITY_TIMEOUT && user) {
         try {
+            console.log(`⏱️ Tiempo de inactividad excedido (${Math.floor(timeElapsed / 1000)}s > ${INACTIVITY_TIMEOUT / 1000}s)`);
             if (onLogout) {
                 await onLogout();
             }
@@ -21,7 +25,7 @@ export const checkInactivity = async (lastActivity, user, onLogout) => {
 export const updateLastActivity = () => {
     const now = Date.now();
     localStorage.setItem('lastActivity', now.toString());
-    console.log('📝 Última actividad actualizada:', new Date(now).toLocaleTimeString());
+    // console.log('📝 Actividad registrada, sesión extendida:', new Date(now).toLocaleTimeString());
     return now;
 };
 
@@ -36,4 +40,4 @@ export const clearCartAndLogout = async (onLogout) => {
         console.error('❌ Error durante el proceso de cierre de sesión:', error);
         return false;
     }
-}; 
+};

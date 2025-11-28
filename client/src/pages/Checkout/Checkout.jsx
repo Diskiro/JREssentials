@@ -367,7 +367,7 @@ export default function CheckoutPage() {
                                     label="Depósito por OXXO"
                                 />
 
-                                {paymentMethod === 'oxxo' && (
+                                {/* {paymentMethod === 'oxxo' && (
                                     <Box sx={{ ml: 4, mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
                                         <Typography variant="subtitle2" fontWeight="bold">
                                             Datos para depósito en OXXO:
@@ -391,7 +391,7 @@ export default function CheckoutPage() {
                                             <strong>No de Cuenta:</strong> 4152313853018351
                                         </Typography>
                                     </Box>
-                                )}
+                                )} */}
                             </RadioGroup>
                         </Paper>
                     )}
