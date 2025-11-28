@@ -9,9 +9,13 @@ import {
     Box,
     Alert,
     Snackbar,
-    Grid
+    Grid,
+    InputAdornment,
+    IconButton
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../../context/auth/useAuth';
+import { useCart } from '../../context/CartContext';
 import styles from '../../styles/Register.module.css';
 
 export function RegisterPage() {
@@ -26,8 +30,12 @@ export function RegisterPage() {
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const navigate = useNavigate();
     const { register, alert, closeAlert } = useAuth();
+    const { addToCart } = useCart();
 
     const validateEmail = (email) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -108,6 +116,13 @@ export function RegisterPage() {
         }
     };
 
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleClickShowConfirmPassword = () => setShowConfirmPassword((show) => !show);
+
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -120,6 +135,17 @@ export function RegisterPage() {
         try {
             const userId = await register(formData);
             if (userId) {
+                // Check for pending cart item
+                const pendingItem = localStorage.getItem('pendingCartItem');
+                if (pendingItem) {
+                    try {
+                        const { product, size, quantity } = JSON.parse(pendingItem);
+                        await addToCart(product, size, quantity);
+                        localStorage.removeItem('pendingCartItem');
+                    } catch (error) {
+                        console.error('Error adding pending item to cart:', error);
+                    }
+                }
                 navigate('/');
             }
         } finally {
@@ -180,7 +206,7 @@ export function RegisterPage() {
                             <TextField
                                 fullWidth
                                 label="Contraseña"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
@@ -188,13 +214,27 @@ export function RegisterPage() {
                                 helperText={errors.password}
                                 required
                                 className={styles.inputField}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={handleClickShowPassword}
+                                                onMouseDown={handleMouseDownPassword}
+                                                edge="end"
+                                            >
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sx={{ width: '100%' }}>
                             <TextField
                                 fullWidth
                                 label="Confirmar Contraseña"
-                                type="password"
+                                type={showConfirmPassword ? 'text' : 'password'}
                                 name="confirmPassword"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
@@ -202,6 +242,20 @@ export function RegisterPage() {
                                 helperText={errors.confirmPassword}
                                 required
                                 className={styles.inputField}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle confirm password visibility"
+                                                onClick={handleClickShowConfirmPassword}
+                                                onMouseDown={handleMouseDownPassword}
+                                                edge="end"
+                                            >
+                                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sx={{ width: '100%' }}>
@@ -276,4 +330,4 @@ export function RegisterPage() {
             </Snackbar>
         </Container>
     );
-} 
+}

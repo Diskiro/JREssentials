@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Typography, Box, Paper } from '@mui/material';
 import styles from '../../styles/About.module.css';
+import OptimizedImage from '../../components/OptimizedImage/OptimizedImage';
 
 const About = () => {
     return (
@@ -11,8 +12,8 @@ const About = () => {
                 </Typography>
 
                 <Box className={styles.imageContainer}>
-                    <img
-                        src="/CharysBoutique.jpeg"
+                    <OptimizedImage
+                        src="/JR_Essentials.jpg"
                         alt="J&R Essentials"
                         className={styles.aboutImage}
                     />

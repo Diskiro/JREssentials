@@ -8,18 +8,32 @@ import {
     Typography,
     Box,
     Alert,
-    Snackbar
+    Snackbar,
+    InputAdornment,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../../context/auth/useAuth';
+import { useCart } from '../../context/CartContext';
 
 export function LoginPage() {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+
     const navigate = useNavigate();
-    const { login, alert, closeAlert } = useAuth();
+    const { login, resetPassword, alert, closeAlert } = useAuth();
+    const { addToCart } = useCart();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -29,6 +43,12 @@ export function LoginPage() {
         }));
     };
 
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -36,10 +56,39 @@ export function LoginPage() {
         try {
             const user = await login(formData.email, formData.password);
             if (user) {
+                // Check for pending cart item
+                const pendingItem = localStorage.getItem('pendingCartItem');
+                if (pendingItem) {
+                    try {
+                        const { product, size, quantity } = JSON.parse(pendingItem);
+                        await addToCart(product, size, quantity);
+                        localStorage.removeItem('pendingCartItem');
+                    } catch (error) {
+                        console.error('Error adding pending item to cart:', error);
+                    }
+                }
                 navigate('/');
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleForgotPasswordClick = () => {
+        setForgotPasswordOpen(true);
+    };
+
+    const handleForgotPasswordClose = () => {
+        setForgotPasswordOpen(false);
+        setResetEmail('');
+    };
+
+    const handleResetPasswordSubmit = async () => {
+        if (!resetEmail) return;
+
+        const success = await resetPassword(resetEmail);
+        if (success) {
+            handleForgotPasswordClose();
         }
     };
 
@@ -65,13 +114,38 @@ export function LoginPage() {
                     <TextField
                         fullWidth
                         label="Contraseña"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
                         required
                         sx={{ mb: 2 }}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}
                     />
+
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                        <Button
+                            color="primary"
+                            size="small"
+                            onClick={handleForgotPasswordClick}
+                            sx={{ textTransform: 'none' }}
+                        >
+                            ¿Olvidaste tu contraseña?
+                        </Button>
+                    </Box>
 
                     <Button
                         type="submit"
@@ -95,6 +169,31 @@ export function LoginPage() {
                 </Box>
             </Paper>
 
+            {/* Forgot Password Dialog */}
+            <Dialog open={forgotPasswordOpen} onClose={handleForgotPasswordClose}>
+                <DialogTitle>Recuperar Contraseña</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="reset-email"
+                        label="Correo Electrónico"
+                        type="email"
+                        fullWidth
+                        variant="standard"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleForgotPasswordClose}>Cancelar</Button>
+                    <Button onClick={handleResetPasswordSubmit}>Enviar</Button>
+                </DialogActions>
+            </Dialog>
+
             <Snackbar
                 open={alert.open}
                 autoHideDuration={6000}
@@ -110,4 +209,4 @@ export function LoginPage() {
             </Snackbar>
         </Container>
     );
-} 
+}

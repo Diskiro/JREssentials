@@ -21,6 +21,7 @@ import { db } from '../../firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import '../../styles/Header.css';
 import InactivityHandler from '../InactivityHandler/InactivityHandler';
+import OptimizedImage from '../OptimizedImage/OptimizedImage';
 
 const Header = () => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -83,8 +84,8 @@ const Header = () => {
     return (
         <>
             <InactivityHandler />
-            <AppBar position="sticky" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #e0e0e0', backgroundColor: '#fff' }}>
-                <Toolbar className="header-container" sx={{ justifyContent: 'space-between' }}>
+            <AppBar className='header' position="sticky" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #e0e0e0', backgroundColor: '#fff' }}>
+                <Toolbar className="header-container" sx={{ justifyContent: 'space-between',  minHeight: '65px' }}>
                     {isMobile ? (
                         <>
                             <Box sx={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
@@ -97,12 +98,14 @@ const Header = () => {
                                 </IconButton>
                             </Box>
                             {/* Logo centrado */}
-                            <Box sx={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <Box sx={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
                                 <Link to="/" className="logo-link" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <img
+                                    <OptimizedImage
+                                        className="logo-mobile"
                                         src="/JR_Essentials.jpg"
                                         alt="J&R Essentials"
-                                        style={{ width: '65px', height: '65px', objectFit: 'contain' }}
+                                        width={65}
+                                        height={65}
                                     />
                                 </Link>
                             </Box>
@@ -141,6 +144,7 @@ const Header = () => {
                             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', gap: 2 }}>
                                 {categories.slice(0, 4).map((category) => (
                                     <Button
+                                        className='category-button'
                                         key={category.id}
                                         color="inherit"
                                         component={Link}
