@@ -176,6 +176,9 @@ export function LoginPage() {
                     <DialogContentText>
                         Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
                     </DialogContentText>
+                    <DialogContentText>
+                        <strong>Revisa en spam si no encuentras el correo.</strong>
+                    </DialogContentText>
                     <TextField
                         autoFocus
                         margin="dense"

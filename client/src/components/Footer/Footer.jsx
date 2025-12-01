@@ -89,11 +89,11 @@ const Footer = () => {
                             Información
                         </Typography>
                         <Box component="nav">
-                            <Link href="#" color="inherit" underline="hover" display="block" sx={{ mb: 1 }}>
+                            <Link href="/about" color="inherit" underline="hover" display="block" sx={{ mb: 1 }}>
                                 Sobre Nosotros
                             </Link>
                             <Link href="#" color="inherit" underline="hover" display="block" sx={{ mb: 1 }}>
-                                Envíos y Devoluciones
+                                Envíos
                             </Link>
                             <Link href="#" color="inherit" underline="hover" display="block" sx={{ mb: 1 }}>
                                 Términos y Condiciones

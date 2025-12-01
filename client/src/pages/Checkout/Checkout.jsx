@@ -19,7 +19,12 @@ import {
     Link as MuiLink,
     CircularProgress,
     Snackbar,
-    Alert
+    Alert,
+    Select,
+    MenuItem,
+    InputLabel,
+    FormControl,
+    ListSubheader
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../utils/priceUtils';
@@ -125,7 +130,7 @@ export default function CheckoutPage() {
                     customerEmail: formData.email,
                     customerPhone: formData.phone,
                     shippingMethod: shippingMethod,
-                    metroStation: user.metroStation || '',
+                    metroStation: formData.metroStation || user.metroStation || '',
                     paymentMethod: paymentMethod,
                     items: cart,
                     subtotal: getSubtotal(),
@@ -182,7 +187,7 @@ export default function CheckoutPage() {
                         customerEmail: formData.email,
                         customerPhone: formData.phone,
                         shippingMethod: shippingMethod,
-                        metroStation: user.metroStation || '',
+                        metroStation: formData.metroStation || user.metroStation || '',
                         paymentMethod: paymentMethod,
                         items: cart,
                         subtotal: getSubtotal(),
@@ -307,16 +312,37 @@ export default function CheckoutPage() {
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        required
-                                        fullWidth
-                                        label="Estación de metro"
-                                        variant="outlined"
-                                        margin="normal"
-                                        name="metroStation"
-                                        value={user?.metroStation || ''}
-                                        disabled
-                                    />
+                                    <FormControl fullWidth margin="normal" required>
+                                        <InputLabel id="metro-station-label">Estación de metro</InputLabel>
+                                        <Select
+                                            labelId="metro-station-label"
+                                            id="metro-station-select"
+                                            name="metroStation"
+                                            value={formData.metroStation}
+                                            label="Estación de metro"
+                                            onChange={handleChange}
+                                        >
+                                            <ListSubheader>Linea 2</ListSubheader>
+                                            <MenuItem value="Cuatro Caminos">Cuatro Caminos</MenuItem>
+                                            <MenuItem value="Panteones">Panteones</MenuItem>
+                                            <MenuItem value="Tacuba">Tacuba</MenuItem>
+                                            <MenuItem value="Cuitláhuac">Cuitláhuac</MenuItem>
+                                            <MenuItem value="Popotla">Popotla</MenuItem>
+                                            <MenuItem value="Colegio Militar">Colegio Militar</MenuItem>
+                                            <MenuItem value="Normal">Normal</MenuItem>
+                                            <MenuItem value="San Cosme">San Cosme</MenuItem>
+                                            <MenuItem value="Revolución">Revolución</MenuItem>
+                                            <MenuItem value="Hidalgo">Hidalgo</MenuItem>
+
+                                            <ListSubheader>Linea 7</ListSubheader>
+                                            <MenuItem value="Camarones">Camarones</MenuItem>
+                                            <MenuItem value="Refinería">Refinería</MenuItem>
+                                            <MenuItem value="Tacuba (L7)">Tacuba</MenuItem>
+                                            <MenuItem value="San Joaquín">San Joaquín</MenuItem>
+                                            <MenuItem value="Polanco">Polanco</MenuItem>
+                                            <MenuItem value="Auditorio">Auditorio</MenuItem>
+                                        </Select>
+                                    </FormControl>
                                 </Grid>
                             </Grid>
                         </Paper>
@@ -349,15 +375,6 @@ export default function CheckoutPage() {
                                         <Typography variant="body2">
                                             <strong>No de Tarjeta:</strong> 5101 2547 2180 3766
                                         </Typography>
-                                        {/* <Typography variant="body2" sx={{ mt: 1 }}>
-                                            <strong>Nombre:</strong> Ruby Jazmin Marin Carrasco
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>Banco:</strong> BBVA
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>No de Cuenta:</strong> 4152 3138 5301 8351
-                                        </Typography> */}
                                     </Box>
                                 )}
 
@@ -366,32 +383,6 @@ export default function CheckoutPage() {
                                     control={<Radio />}
                                     label="Depósito por OXXO"
                                 />
-
-                                {/* {paymentMethod === 'oxxo' && (
-                                    <Box sx={{ ml: 4, mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-                                        <Typography variant="subtitle2" fontWeight="bold">
-                                            Datos para depósito en OXXO:
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ mt: 1 }}>
-                                            <strong>Nombre:</strong> Arlenne Medel Mayen
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>Banco:</strong> Banamex
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>No de Tarjeta:</strong> 5204165898960293
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ mt: 1 }}>
-                                            <strong>Nombre:</strong> Arlenne Medel Mayen
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>Banco:</strong> BBVA
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>No de Cuenta:</strong> 4152313853018351
-                                        </Typography>
-                                    </Box>
-                                )} */}
                             </RadioGroup>
                         </Paper>
                     )}
@@ -409,7 +400,7 @@ export default function CheckoutPage() {
                                 <strong>Nombre:</strong> {formData.name}<br />
                                 <strong>Email:</strong> {formData.email}<br />
                                 <strong>Teléfono:</strong> {formData.phone}<br />
-                                <strong>Estación de metro:</strong> {user?.metroStation || 'No especificada'}<br />
+                                <strong>Estación de metro:</strong> {formData.metroStation || 'No especificada'}<br />
                                 <strong>Método de envío:</strong> Envío a estación de metro más cercana
                             </Typography>
 
