@@ -355,6 +355,27 @@ function Products() {
     }
   };
 
+  const handleToggleFeatured = async (product) => {
+    try {
+      const newFeaturedStatus = !product.featured;
+
+      // Optimistic update
+      const updateList = (list) =>
+        list.map(p => p.id === product.id ? { ...p, featured: newFeaturedStatus } : p);
+
+      setProducts(prev => updateList(prev));
+      setFilteredProducts(prev => updateList(prev));
+
+      await updateDoc(doc(db, 'products', product.id), {
+        featured: newFeaturedStatus
+      });
+    } catch (error) {
+      console.error('Error updating featured status:', error);
+      // Revert on error
+      fetchProducts();
+    }
+  };
+
   const downloadCSV = () => {
     const headers = ['ID', 'Nombre', 'Precio', 'Descripción', 'Categoría', 'Imágenes', 'Inventario', 'Destacado'];
     const csvContent = [
@@ -528,7 +549,7 @@ function Products() {
                     control={
                       <Checkbox
                         checked={product.featured || false}
-                        disabled
+                        onChange={() => handleToggleFeatured(product)}
                       />
                     }
                     label=""
@@ -707,4 +728,4 @@ function Products() {
   );
 }
 
-export default Products; 
+export default Products;
