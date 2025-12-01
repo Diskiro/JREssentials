@@ -21,40 +21,48 @@ const About = () => {
 
                 <Box className={styles.textContent}>
                     <Typography paragraph className={styles.paragraph}>
-                        En J&R Essentials, creemos que la moda es sinónimo de confianza, comodidad y estilo sin límites. Somos un espacio dedicado a la mujer curvy, donde cada prenda está cuidadosamente seleccionada para resaltar tu belleza única y acompañarte en cada momento de tu vida.
+                        Bienvenida a J&R Essentials, el espacio donde creemos que los accesorios no son solo un complemento, sino el detalle que te da la confianza para ser la protagonista de tu historia.
                     </Typography>
 
                     <Typography paragraph className={styles.paragraph}>
-                        Nuestra misión es romper estereotipos y ofrecer ropa de calidad, a la moda y con tallajes reales, porque sabemos que el estilo no tiene talla. Desde looks casuales hasta outfits elegantes, en nuestra boutique encontrarás piezas que se adaptan a tu cuerpo y personalidad, siempre con el toque exclusivo que nos caracteriza.
+                        Nacimos de una idea simple pero poderosa, la elegancia no tiene por qué ser aburrida, y la moda juvenil también puede ser sofisticada. Entendemos que un buen par de aretes tiene el poder de transformar no solo un outfit, sino tu actitud.
+                    </Typography>
+
+                    <Typography paragraph className={styles.paragraph}>
+                        En J&R Essentials tenemos piezas pensadas para la mujer multifacética de hoy. La que busca ese toque "chunky y glam" para destacar en una noche de fiesta, pero también esa delicadeza dorada de un "Golden Garden" para iluminar su día a día.
+                    </Typography>
+
+                    <Typography paragraph className={styles.paragraph}>
+                        Nuestra misión va más allá de vender aretes. Queremos acompañarte en cada paso. Como reza nuestro lema, queremos que uses nuestras piezas y sientas la seguridad de brillar sin pedir permiso.
+                    </Typography>
+
+                    <Typography paragraph className={styles.paragraph}>
+                        Gracias por ser parte de este viaje brillante.
+                    </Typography>
+
+                    <Typography paragraph className={styles.paragraph} sx={{ fontWeight: 'bold' }}>
+                        Con amor, El equipo de J&R.
                     </Typography>
 
                     <Typography variant="h4" component="h2" className={styles.subtitle}>
-                        ¿Por qué elegirnos?
+                        3 Razones para amarnos
                     </Typography>
 
                     <Box className={styles.features}>
                         <Typography paragraph className={styles.feature}>
-                            ✨ Diseños pensados para ti: Prendas que combinan tendencias, comodidad y ajuste perfecto.
+                            <strong>Estilo que roba miradas:</strong> Ya sean nuestros corazones puffy o los diseños florales, nuestras piezas son conversation starters. Prepárate para que te pregunten: "¿Dónde compraste tus aretes?".
                         </Typography>
                         <Typography paragraph className={styles.feature}>
-                            ✨ Variedad y versatilidad: Desde ropa casual hasta elegante, para todas las ocasiones.
+                            <strong>Lujo Accesible:</strong> Creemos que brillar no debería costar una fortuna. Te ofrecemos esa estética high-end y dorada a precios que te permiten estrenar seguido.
                         </Typography>
                         <Typography paragraph className={styles.feature}>
-                            ✨ Asesoramiento personalizado: Te ayudamos a encontrar piezas que te hagan sentir tan fabulosa como eres.
+                            <strong>Tu brillo es nuestra prioridad:</strong> Desde que entras a la web hasta que abres tu paquete, cuidamos cada detalle para que tu experiencia sea tan brillante como tus nuevos accesorios.
                         </Typography>
                     </Box>
-
-                    <Typography paragraph className={styles.paragraph}>
-                        En J&R Essentials, celebramos la diversidad y empoderamos a través de la moda. ¡Porque todas merecemos brillar con confianza!
-                    </Typography>
-
-                    <Typography variant="h5" component="h3" className={styles.welcome}>
-                        ¡Bienvenida a tu nuevo destino fashion!
-                    </Typography>
                 </Box>
             </Paper>
         </Container>
     );
 };
 
-export default About; 
+export default About;

@@ -11,7 +11,12 @@ import {
     Snackbar,
     Grid,
     InputAdornment,
-    IconButton
+    IconButton,
+    Select,
+    MenuItem,
+    InputLabel,
+    FormControl,
+    ListSubheader
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../../context/auth/useAuth';
@@ -277,17 +282,42 @@ export function RegisterPage() {
                             />
                         </Grid>
                         <Grid item xs={12} sx={{ width: '100%' }}>
-                            <TextField
-                                fullWidth
-                                label="Estación de Metro más cercana"
-                                name="metroStation"
-                                value={formData.metroStation}
-                                onChange={handleChange}
-                                error={!!errors.metroStation}
-                                helperText={errors.metroStation}
-                                required
-                                className={styles.inputField}
-                            />
+                            <FormControl fullWidth required error={!!errors.metroStation} className={styles.inputField}>
+                                <InputLabel id="metro-station-label">Estación de Metro más cercana</InputLabel>
+                                <Select
+                                    labelId="metro-station-label"
+                                    id="metro-station-select"
+                                    name="metroStation"
+                                    value={formData.metroStation}
+                                    label="Estación de Metro más cercana"
+                                    onChange={handleChange}
+                                >
+                                    <ListSubheader>Linea 2</ListSubheader>
+                                    <MenuItem value="Cuatro Caminos">Cuatro Caminos</MenuItem>
+                                    <MenuItem value="Panteones">Panteones</MenuItem>
+                                    <MenuItem value="Tacuba">Tacuba</MenuItem>
+                                    <MenuItem value="Cuitláhuac">Cuitláhuac</MenuItem>
+                                    <MenuItem value="Popotla">Popotla</MenuItem>
+                                    <MenuItem value="Colegio Militar">Colegio Militar</MenuItem>
+                                    <MenuItem value="Normal">Normal</MenuItem>
+                                    <MenuItem value="San Cosme">San Cosme</MenuItem>
+                                    <MenuItem value="Revolución">Revolución</MenuItem>
+                                    <MenuItem value="Hidalgo">Hidalgo</MenuItem>
+
+                                    <ListSubheader>Linea 7</ListSubheader>
+                                    <MenuItem value="Camarones">Camarones</MenuItem>
+                                    <MenuItem value="Refinería">Refinería</MenuItem>
+                                    <MenuItem value="Tacuba (L7)">Tacuba</MenuItem>
+                                    <MenuItem value="San Joaquín">San Joaquín</MenuItem>
+                                    <MenuItem value="Polanco">Polanco</MenuItem>
+                                    <MenuItem value="Auditorio">Auditorio</MenuItem>
+                                </Select>
+                                {errors.metroStation && (
+                                    <Typography variant="caption" color="error" sx={{ ml: 2, mt: 0.5 }}>
+                                        {errors.metroStation}
+                                    </Typography>
+                                )}
+                            </FormControl>
                         </Grid>
                     </Grid>
 
