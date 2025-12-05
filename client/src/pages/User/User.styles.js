@@ -129,7 +129,7 @@ export const StyledStatusChip = styled(Chip)(({ theme }) => ({
 
 export const StyledFavoritesGrid = styled(Grid)(({ theme }) => ({
     display: 'grid',    
-    gridTemplateColumns: 'repeat(2, 1fr)',
+    gridTemplateColumns: 'repeat(3, 1fr)',
     gap: theme.spacing(3),
     padding: theme.spacing(2),
     [theme.breakpoints.down('sm')]: {

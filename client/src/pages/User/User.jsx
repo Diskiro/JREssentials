@@ -42,6 +42,7 @@ import {
     StyledEmptyFavorites,
     StyledFavoritesLoading
 } from './User.styles';
+import '../../styles/User.css';
 
 // Componente para mostrar la información del usuario
 const UserProfile = React.memo(({ userData, onEditProfile }) => (
@@ -331,7 +332,7 @@ const UserContent = ({
                     />
                 </Grid>
 
-                <Grid item xs={12} md={8}>
+                <Grid item xs={12} md={8} className='profile-grid-item'>
                     <StyledPaper elevation={3}>
                         <StyledTabs
                             value={activeTab}
