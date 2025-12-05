@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 import styles from '../../styles/ProductCard.module.css';
 import { db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import OptimizedImage from '../OptimizedImage/OptimizedImage';
+
 
 export default function ProductCard({ product: initialProduct }) {
     const navigate = useNavigate();
@@ -157,16 +157,15 @@ export default function ProductCard({ product: initialProduct }) {
     return (
         <Card className={styles.productCard}>
             <Box className={styles.imageContainer}>
-                <OptimizedImage
-                    src={mainImage}
-                    alt={product.name}
-                    className={styles.productImage}
+                <img src={mainImage} alt={product.name} className={styles.productImage}
                     onClick={() => navigate(`/producto/${product.id}`, { replace: false })}
                 />
+
             </Box>
             <CardContent className={styles.content}>
                 <Typography
                     className={styles.title}
+                    onClick={() => navigate(`/producto/${product.id}`, { replace: false })}
                 >
                     {product.name}
                 </Typography>

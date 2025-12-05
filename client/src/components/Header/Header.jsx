@@ -21,7 +21,6 @@ import { db } from '../../firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import '../../styles/Header.css';
 import InactivityHandler from '../InactivityHandler/InactivityHandler';
-import OptimizedImage from '../OptimizedImage/OptimizedImage';
 
 const Header = () => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -100,7 +99,7 @@ const Header = () => {
                             {/* Logo centrado */}
                             <Box sx={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
                                 <Link to="/" className="logo-link" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <OptimizedImage
+                                    <img
                                         className="logo-mobile"
                                         src="/JR_Essentials.jpg"
                                         alt="J&R Essentials"

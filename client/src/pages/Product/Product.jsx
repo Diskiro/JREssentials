@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { FavoritesProvider } from '../../context/FavoritesContext';
 import ShareButton from '../../components/ShareButton/ShareButton';
 import '../../styles/Product.css';
-import OptimizedImage from '../../components/OptimizedImage/OptimizedImage';
+
 
 const ProductPageContent = () => {
     const { id } = useParams();
@@ -266,23 +266,16 @@ const ProductPageContent = () => {
                                 <CircularProgress />
                             </Box>
                         )}
-                        <OptimizedImage className="product-image"
+                        <img
                             src={product.images[currentImageIndex]}
                             alt={product.name}
                             style={{
                                 width: '100%',
                                 height: '100%',
-                                display: 'block',
                                 objectFit: 'cover',
                                 opacity: loadedImages[currentImageIndex] ? 1 : 0,
-                                transition: 'opacity 0.3s ease-in-out',
-                                '@media (maxWidth: 768px)': {
-                                    width: '100%',
-                                    height: '400px',
-                                    objectFit: 'contain'
-                                }
-                            }}
-                        />
+                            }} />
+
                         {product.images.length > 1 && (
                             <>
                                 <IconButton
