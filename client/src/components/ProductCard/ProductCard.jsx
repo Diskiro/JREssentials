@@ -172,7 +172,7 @@ export default function ProductCard({ product: initialProduct }) {
                 <Typography
                     className={styles.description}
                     sx={{
-                        whiteSpace: 'pre-line'
+                        whiteSpace: 'pre-line' 
                     }}
                 >
                     {product.description}
