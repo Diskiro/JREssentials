@@ -23,6 +23,7 @@ import EditProfile from './pages/Profile/EditProfile';
 import CategoriesPage from './pages/Categories/CategoriesPage';
 import About from './pages/About/About';
 import Accessories from './pages/Accessories/Accessories';
+import ScrollToTop from './components/ScrollToTop/ScrollToTop';
 
 function App() {
     return (
@@ -31,6 +32,7 @@ function App() {
             <AuthProvider>
                 <CartProvider>
                     <Router>
+                        <ScrollToTop />
                         <Header />
                         <Routes>
                             <Route path="/" element={<HomePage />} />
