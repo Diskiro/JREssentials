@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { loadUserFromLocalStorage, saveUserToLocalStorage } from './auth/authService';
+import { loadUserFromLocalStorage, saveUserToLocalStorage, logoutService } from './auth/authService';
 
 const AuthContext = createContext();
 
@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
+            await logoutService();
             setUser(null);
             saveUserToLocalStorage(null);
             localStorage.removeItem('cart');
