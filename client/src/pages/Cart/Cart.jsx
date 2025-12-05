@@ -132,7 +132,7 @@ const Cart = () => {
                     </Typography>
                     <Button
                         component={Link}
-                        to="/products"
+                        to="/"
                         variant="contained"
                         sx={{ mt: 2 }}
                     >
