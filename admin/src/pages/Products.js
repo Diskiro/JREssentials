@@ -111,7 +111,12 @@ function SortableImage({ image, index, onRemove }) {
         />
         <IconButton
           className="delete-button"
-          onClick={() => onRemove(image)}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(image);
+          }}
           sx={{
             position: 'absolute',
             top: 0,
@@ -526,7 +531,7 @@ function Products() {
                       <img
                         src={product.images[0]}
                         alt={product.name}
-                        style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 4 }}
+                        style={{ height: 100, objectFit: 'cover', borderRadius: 4 }}
                       />
                     )}
                     <Typography variant="body2">
