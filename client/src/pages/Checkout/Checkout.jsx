@@ -370,10 +370,33 @@ export default function CheckoutPage() {
                                             <strong>Nombre:</strong> Ruby Jazmin Marin Carrasco
                                         </Typography>
                                         <Typography variant="body2">
-                                            <strong>Banco:</strong> Nubank
+                                            <strong>Banco:</strong> BanBajio
                                         </Typography>
                                         <Typography variant="body2">
-                                            <strong>No de Tarjeta:</strong> 5101 2547 2180 3766
+                                            <strong>Clabe:</strong> 0301 8090 0046 9352 39
+                                        </Typography>
+                                    </Box>
+                                )}
+
+                                <FormControlLabel
+                                    value="farmacias"
+                                    control={<Radio />}
+                                    label="Depósito por Farmacias Guadalajara"
+                                />
+
+                                {paymentMethod === 'farmacias' && (
+                                    <Box sx={{ ml: 4, mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                                        <Typography variant="subtitle2" fontWeight="bold">
+                                            Datos para depósito:
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ mt: 1 }}>
+                                            <strong>Nombre:</strong> Ruby Jazmin Marin Carrasco
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <strong>Banco:</strong> BanBajio
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <strong>No. Tarjeta:</strong> 4210 0300 6109 9128
                                         </Typography>
                                     </Box>
                                 )}
@@ -383,6 +406,22 @@ export default function CheckoutPage() {
                                     control={<Radio />}
                                     label="Depósito por OXXO"
                                 />
+                                {paymentMethod === 'oxxo' && (
+                                    <Box sx={{ ml: 4, mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                                        <Typography variant="subtitle2" fontWeight="bold">
+                                            Datos para OXXO:
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ mt: 1 }}>
+                                            <strong>Nombre:</strong> Ruby Jazmin Marin Carrasco
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <strong>Banco:</strong> Nubank
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <strong>Clabe:</strong> 5101 2547 2180 3766
+                                        </Typography>
+                                    </Box>
+                                )}
                             </RadioGroup>
                         </Paper>
                     )}
@@ -409,6 +448,7 @@ export default function CheckoutPage() {
                             </Typography>
                             <Typography paragraph>
                                 {paymentMethod === 'transfer' && 'Transferencia bancaria'}
+                                {paymentMethod === 'farmacias' && 'Depósito por Farmacias Guadalajara'}
                                 {paymentMethod === 'oxxo' && 'Depósito por OXXO'}
                             </Typography>
 
