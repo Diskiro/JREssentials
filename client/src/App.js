@@ -24,7 +24,6 @@ import CategoriesPage from './pages/Categories/CategoriesPage';
 import About from './pages/About/About';
 import Accessories from './pages/Accessories/Accessories';
 import ScrollToTop from './components/ScrollToTop/ScrollToTop';
-
 function App() {
     return (
         <ThemeProvider theme={theme}>
@@ -56,7 +55,7 @@ function App() {
                     </Router>
                 </CartProvider>
             </AuthProvider>
-        </ThemeProvider>
+        </ThemeProvider >
     );
 }
 

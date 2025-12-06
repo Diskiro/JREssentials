@@ -9,11 +9,27 @@ export const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-    const [cart, setCart] = useState([]);
+    const [cart, setCart] = useState(() => {
+        try {
+            const savedCart = localStorage.getItem('guestCart');
+            return savedCart ? JSON.parse(savedCart) : [];
+        } catch (error) {
+            console.error('Error parsing guestCart:', error);
+            return [];
+        }
+    });
+
     const [loading, setLoading] = useState(true);
     const [promoCode, setPromoCode] = useState(null);
     const { user, handleLogout } = useAuth();
     const stockCacheRef = useRef({});
+
+    // Persistir carrito de invitado en LocalStorage
+    useEffect(() => {
+        if (!user) {
+            localStorage.setItem('guestCart', JSON.stringify(cart));
+        }
+    }, [cart, user]);
 
     // Función para obtener el stock de un producto
     const getProductStock = async (productId, sizeKey) => {
@@ -79,24 +95,58 @@ export const CartProvider = ({ children }) => {
         [user]
     );
 
-    const loadCart = useCallback(async () => {
-        if (!user) {
-            return;
+    // Helper para fusionar y guardar
+    const mergeAndSave = async (guestCart, userCloudCart, userCartRef) => {
+        const mergedCartMap = new Map();
+        userCloudCart.forEach(item => mergedCartMap.set(item.size, { ...item }));
+
+        for (const guestItem of guestCart) {
+            const existingItem = mergedCartMap.get(guestItem.size);
+            if (existingItem) {
+                mergedCartMap.set(guestItem.size, { ...existingItem, quantity: existingItem.quantity + guestItem.quantity });
+            } else {
+                mergedCartMap.set(guestItem.size, guestItem);
+            }
         }
 
-        try {
-            setLoading(true);
-            const cartRef = doc(db, 'storeUsers', user.uid);
-            const cartDoc = await getDoc(cartRef);
+        const finalMergedCart = Array.from(mergedCartMap.values());
+        await setDoc(userCartRef, {
+            cart: finalMergedCart,
+            mergedAt: new Date().toISOString()
+        }, { merge: true });
 
-            if (cartDoc.exists()) {
-                const data = cartDoc.data();
-                setCart(data.cart || []);
+        return finalMergedCart;
+    };
+
+    const initializeCart = useCallback(async () => {
+        if (!user) return;
+
+        setLoading(true);
+        try {
+            const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+
+            // Prevent race conditions: check and clear immediately
+            if (guestCart.length > 0) {
+                localStorage.removeItem('guestCart'); // CLEAR IMMEDIATELY
+
+                const userCartRef = doc(db, 'storeUsers', user.uid);
+                const userCartDoc = await getDoc(userCartRef);
+                const userCloudCart = userCartDoc.exists() ? (userCartDoc.data().cart || []) : [];
+
+                const finalCart = await mergeAndSave(guestCart, userCloudCart, userCartRef);
+                setCart(finalCart);
             } else {
-                setCart([]);
+                const userCartRef = doc(db, 'storeUsers', user.uid);
+                const userCartDoc = await getDoc(userCartRef);
+
+                if (userCartDoc.exists()) {
+                    setCart(userCartDoc.data().cart || []);
+                } else {
+                    setCart([]);
+                }
             }
         } catch (error) {
-            console.error('❌ Error cargando carrito:', error);
+            console.error('❌ [initializeCart] Error:', error);
             setCart([]);
         } finally {
             setLoading(false);
@@ -105,9 +155,9 @@ export const CartProvider = ({ children }) => {
 
     useEffect(() => {
         if (user) {
-            loadCart();
+            initializeCart();
         }
-    }, [user, loadCart]);
+    }, [user, initializeCart]);
 
     const updateQuantity = async (productId, size, quantity) => {
         try {
@@ -177,11 +227,6 @@ export const CartProvider = ({ children }) => {
             const realAvailableStock = availableStock + currentCartQuantity;
             const newTotalQuantity = currentCartQuantity + quantity;
 
-            console.log('Stock en DB:', availableStock);
-            console.log('Stock real disponible:', realAvailableStock);
-            console.log('Cantidad en carrito:', currentCartQuantity);
-            console.log('Nueva cantidad total:', newTotalQuantity);
-
             if (realAvailableStock <= 0) {
                 throw new Error('El producto está agotado');
             }
@@ -212,7 +257,14 @@ export const CartProvider = ({ children }) => {
             }
 
             setCart(newCart);
-            await debouncedSaveCart(newCart);
+
+            // IMPORTANTE: Si es usuario logueado, se guarda en firebase via debouncedSaveCart
+            // Si es invitado, el useEffect detectará el cambio y guardará en localStorage
+            if (user) {
+                await debouncedSaveCart(newCart);
+            } else {
+                localStorage.setItem('guestCart', JSON.stringify(newCart));
+            }
 
             return true;
         } catch (error) {
@@ -236,7 +288,12 @@ export const CartProvider = ({ children }) => {
 
             const newCart = cart.filter(item => item.size !== sizeKey);
             setCart(newCart);
-            debouncedSaveCart(newCart);
+
+            if (user) {
+                debouncedSaveCart(newCart);
+            } else {
+                localStorage.setItem('guestCart', JSON.stringify(newCart));
+            }
         } catch (error) {
             console.error('Error removing from cart:', error);
             throw error;
@@ -245,7 +302,9 @@ export const CartProvider = ({ children }) => {
 
     const clearCartInDatabase = useCallback(async () => {
         if (!user) {
-            throw new Error('No hay usuario autenticado');
+            // Si es invitado, solo limpiamos el estado (que limpiará el localstorage por el effect)
+            setCart([]);
+            return true;
         }
 
         try {
@@ -284,8 +343,8 @@ export const CartProvider = ({ children }) => {
             // Limpiar el carrito en la base de datos
             await clearCartInDatabase();
 
-            // Actualizar el estado local
-            setCart([]);
+            // Actualizar el estado local (hecho dentro de clearCartInDatabase)
+            // setCart([]); 
         } catch (error) {
             console.error('Error al limpiar el carrito:', error);
             throw error;
@@ -294,7 +353,23 @@ export const CartProvider = ({ children }) => {
 
     const clearCartForInactivity = useCallback(async () => {
         if (!user) {
-            console.log('❌ No hay usuario autenticado');
+            console.log('ℹ️ Limpiando carrito de invitado por inactividad');
+            // Para invitados, el "clearCart" local es suficiente, pero queremos restaurar stock.
+            // La función original restauraba stock. Vamos a reusar la lógica de restaurar stock pero adaptada.
+            // Copiamos la lógica de abajo:
+
+            // Restaurar el stock de cada producto en el carrito local
+            for (const item of cart) {
+                const [productId] = item.size.split('__');
+                const productRef = doc(db, 'products', productId);
+
+                try {
+                    await updateDoc(productRef, {
+                        [`inventory.${item.size}`]: increment(item.quantity)
+                    });
+                } catch (e) { console.error("Error restaurando stock inactividad", e) }
+            }
+            setCart([]);
             return;
         }
 
@@ -309,10 +384,10 @@ export const CartProvider = ({ children }) => {
             }
 
             const userData = userDoc.data();
-            const cart = userData.cart || [];
+            const cartItems = userData.cart || [];
 
             // Restaurar el stock de cada producto en el carrito
-            for (const item of cart) {
+            for (const item of cartItems) {
                 const productRef = doc(db, 'products', item.productId);
 
                 console.log(`📥 Restaurando ${item.quantity} unidades al producto ${item.productId} talla ${item.size}`);
@@ -342,7 +417,7 @@ export const CartProvider = ({ children }) => {
             console.error('❌ Error al limpiar el carrito por inactividad:', error);
             throw error;
         }
-    }, [user]);
+    }, [user, cart]);
 
     const getTotalItems = () => {
         return cart.reduce((total, item) => total + item.quantity, 0);
@@ -412,7 +487,7 @@ export const CartProvider = ({ children }) => {
         clearCart,
         clearCartInDatabase,
         clearCartForInactivity,
-        loadCart,
+        loadCart: initializeCart, // Maintain API compatibility if needed, or remove
         getTotalItems,
         getTotalPrice,
         getSubtotal,
