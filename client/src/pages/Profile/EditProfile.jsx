@@ -10,7 +10,12 @@ import {
     Grid,
     Alert,
     Snackbar,
-    CircularProgress
+    CircularProgress,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    ListSubheader
 } from '@mui/material';
 import { db } from '../../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -160,14 +165,37 @@ export default function EditProfile() {
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                label="Estación de metro"
-                                name="metroStation"
-                                value={formData.metroStation}
-                                onChange={handleChange}
-                                placeholder="Ej: Metro Insurgentes"
-                            />
+                            <FormControl fullWidth margin="normal" required>
+                                <InputLabel id="metro-station-label">Estación de metro</InputLabel>
+                                <Select
+                                    labelId="metro-station-label"
+                                    id="metro-station-select"
+                                    name="metroStation"
+                                    value={formData.metroStation}
+                                    label="Estación de metro"
+                                    onChange={handleChange}
+                                >
+                                    <ListSubheader>Linea 2</ListSubheader>
+                                    <MenuItem value="Cuatro Caminos">Cuatro Caminos</MenuItem>
+                                    <MenuItem value="Panteones">Panteones</MenuItem>
+                                    <MenuItem value="Tacuba">Tacuba</MenuItem>
+                                    <MenuItem value="Cuitláhuac">Cuitláhuac</MenuItem>
+                                    <MenuItem value="Popotla">Popotla</MenuItem>
+                                    <MenuItem value="Colegio Militar">Colegio Militar</MenuItem>
+                                    <MenuItem value="Normal">Normal</MenuItem>
+                                    <MenuItem value="San Cosme">San Cosme</MenuItem>
+                                    <MenuItem value="Revolución">Revolución</MenuItem>
+                                    <MenuItem value="Hidalgo">Hidalgo</MenuItem>
+
+                                    <ListSubheader>Linea 7</ListSubheader>
+                                    <MenuItem value="Camarones">Camarones</MenuItem>
+                                    <MenuItem value="Refinería">Refinería</MenuItem>
+                                    <MenuItem value="Tacuba (L7)">Tacuba</MenuItem>
+                                    <MenuItem value="San Joaquín">San Joaquín</MenuItem>
+                                    <MenuItem value="Polanco">Polanco</MenuItem>
+                                    <MenuItem value="Auditorio">Auditorio</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Grid>
                     </Grid>
                     <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
