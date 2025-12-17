@@ -28,6 +28,7 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../utils/priceUtils';
+import { calculateDistance } from '../../utils/distanceUtils';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -40,17 +41,21 @@ export default function CheckoutPage() {
     const [activeStep, setActiveStep] = useState(0);
     const [paymentMethod, setPaymentMethod] = useState('transfer');
     const [shippingSameAsBilling, setShippingSameAsBilling] = useState(true);
-    const [shippingMethod, setShippingMethod] = useState('metro');
+    const [shippingMethod, setShippingMethod] = useState('domicilio');
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         phone: '',
-        metroStation: ''
+        metroStation: '',
+        zipCode: ''
     });
     const { user } = useAuth();
     const { cart, getTotalPrice, clearCart, getSubtotal, getDiscountAmount, promoCode } = useCart();
     const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
+    const [calculatingDistance, setCalculatingDistance] = useState(false);
+    const [distanceInfo, setDistanceInfo] = useState(null);
+    const [shippingCost, setShippingCost] = useState(40); // Base shipping cost
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
@@ -87,6 +92,22 @@ export default function CheckoutPage() {
         setPaymentMethod(event.target.value);
     };
 
+    const handleShippingMethodChange = (event) => {
+        const method = event.target.value;
+        setShippingMethod(method);
+
+        if (method === 'popotla') {
+            setShippingCost(0);
+        } else {
+            // Restore calculated price or base price
+            if (distanceInfo && distanceInfo.distance && distanceInfo.distance.value) {
+                setShippingCost(getShippingPrice(distanceInfo.distance.value));
+            } else {
+                setShippingCost(40); // Base cost
+            }
+        }
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -97,6 +118,48 @@ export default function CheckoutPage() {
 
     const handleCloseSnackbar = () => {
         setSnackbar({ ...snackbar, open: false });
+    };
+
+    const getShippingPrice = (distanceInMeters) => {
+        const km = distanceInMeters / 1000;
+        if (km <= 2) return 40;
+        if (km <= 4) return 60;
+        if (km <= 6) return 80;
+        if (km <= 8) return 100;
+        if (km <= 10) return 110;
+        if (km <= 13) return 120;
+        if (km <= 16) return 180;
+        return 180; // Default max or fallback
+    };
+
+    const handleCalculateDistance = async () => {
+        if (!formData.zipCode) return;
+
+        setCalculatingDistance(true);
+        setDistanceInfo(null);
+        try {
+            const data = await calculateDistance(formData.zipCode);
+            // Google Maps Distance Matrix response structure
+            if (data.rows && data.rows[0] && data.rows[0].elements && data.rows[0].elements[0]) {
+                const element = data.rows[0].elements[0];
+                if (element.status === 'OK') {
+                    setDistanceInfo(element);
+                    if (element.distance && element.distance.value) {
+                        const newShippingCost = getShippingPrice(element.distance.value);
+                        setShippingCost(newShippingCost);
+                    }
+                } else {
+                    setSnackbar({ open: true, message: `No se pudo calcular la distancia: ${element.status}`, severity: 'warning' });
+                }
+            } else {
+                setSnackbar({ open: true, message: 'Respuesta inesperada al calcular distancia.', severity: 'error' });
+            }
+        } catch (error) {
+            console.error(error);
+            setSnackbar({ open: true, message: 'Error al conectar con el servicio de distancia.', severity: 'error' });
+        } finally {
+            setCalculatingDistance(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -135,8 +198,8 @@ export default function CheckoutPage() {
                     items: cart,
                     subtotal: getSubtotal(),
                     discount: getDiscountAmount(),
-                    shippingCost: shipping,
-                    totalAmount: total,
+                    shippingCost: shippingCost,
+                    totalAmount: total + shippingCost,
                     promoCode: promoCode ? {
                         code: promoCode.code,
                         discountPercentage: promoCode.discountPercentage
@@ -192,8 +255,8 @@ export default function CheckoutPage() {
                         items: cart,
                         subtotal: getSubtotal(),
                         discount: getDiscountAmount(),
-                        shippingCost: shipping,
-                        total: total,
+                        shippingCost: shippingCost,
+                        total: total + shippingCost,
                         promoCode: promoCode,
                         createdAt: new Date().toISOString(),
                         status: 'pending'
@@ -210,7 +273,7 @@ export default function CheckoutPage() {
     };
 
     const subtotal = getSubtotal ? getSubtotal() : getTotalPrice();
-    const shipping = 40;
+    // shipping uses state shippingCost
     const discount = getDiscountAmount ? getDiscountAmount() : 0;
     const total = getTotalPrice();
 
@@ -240,38 +303,79 @@ export default function CheckoutPage() {
                                 <Typography variant="subtitle1" gutterBottom>
                                     Método de envío
                                 </Typography>
-                                <Box sx={{
-                                    p: 2,
-                                    bgcolor: 'primary.dark',
-                                    borderRadius: 1,
-                                    color: 'white',
-                                    mb: 2
-                                }}>
-                                    <Typography variant="subtitle1" gutterBottom>
-                                        Envío a estación de metro más cercana ($40.00)
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ mb: 2 }}>
-                                        Para coordinar el envío y recibo de tu producto comunícate a este WhatsApp:
-                                    </Typography>
-                                    <Button
-                                        variant="contained"
-                                        color="success"
-                                        startIcon={<WhatsAppIcon />}
-                                        component={MuiLink}
-                                        href="https://wa.me/525559032017"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        sx={{
-                                            textTransform: 'none',
-                                            bgcolor: '#25D366',
-                                            '&:hover': {
-                                                bgcolor: '#128C7E'
-                                            }
-                                        }}
-                                    >
-                                        Contactar por WhatsApp
-                                    </Button>
-                                </Box>
+
+                                <RadioGroup value={shippingMethod} onChange={handleShippingMethodChange}>
+                                    <FormControlLabel
+                                        value="domicilio"
+                                        control={<Radio />}
+                                        label={`Envío a domicilio (${formatPrice(shippingMethod === 'domicilio' ? shippingCost : (distanceInfo ? getShippingPrice(distanceInfo.distance.value) : 40))})`}
+                                    />
+
+                                    {shippingMethod === 'domicilio' && (
+                                        <Box sx={{ ml: 4, mb: 2, p: 2, boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', borderRadius: 1 }}>
+                                            {/* Distance Calculation Section */}
+                                            <Box sx={{ mt: 1, mb: 2 }}>
+                                                <Grid container spacing={2} alignItems="center">
+                                                    <Grid item xs={8} sm={9}>
+                                                        <TextField
+                                                            fullWidth
+                                                            size="small"
+                                                            label="Código Postal (para calcular distancia)"
+                                                            name="zipCode"
+                                                            value={formData.zipCode || ''}
+                                                            onChange={handleChange}
+                                                            sx={{ bgcolor: 'white', borderRadius: 1 }}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={4} sm={3}>
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            onClick={handleCalculateDistance}
+                                                            disabled={calculatingDistance || !formData.zipCode}
+                                                            fullWidth
+                                                        >
+                                                            {calculatingDistance ? <CircularProgress size={24} /> : 'Calcular'}
+                                                        </Button>
+                                                    </Grid>
+                                                </Grid>
+                                                {distanceInfo && (
+                                                    <Alert severity="info" sx={{ mt: 1 }}>
+                                                        Distancia aproximada: <strong>{distanceInfo.distance?.text}</strong>
+                                                    </Alert>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    )}
+
+                                    <FormControlLabel
+                                        value="popotla"
+                                        control={<Radio />}
+                                        label="Entrega en metro Popotla (Gratis)"
+                                    />
+                                </RadioGroup>
+
+                                <Typography variant="body2" sx={{ mb: 2, mt: 2 }}>
+                                    Para coordinar el envío y recibo de tu producto comunícate a este WhatsApp:
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    color="success"
+                                    startIcon={<WhatsAppIcon />}
+                                    component={MuiLink}
+                                    href="https://wa.me/525559032017"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    sx={{
+                                        textTransform: 'none',
+                                        bgcolor: '#25D366',
+                                        '&:hover': {
+                                            bgcolor: '#128C7E'
+                                        }
+                                    }}
+                                >
+                                    Contactar por WhatsApp
+                                </Button>
                             </Box>
 
                             <Grid container spacing={2}>
@@ -310,39 +414,6 @@ export default function CheckoutPage() {
                                         value={formData.phone}
                                         onChange={handleChange}
                                     />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl fullWidth margin="normal" required>
-                                        <InputLabel id="metro-station-label">Estación de metro</InputLabel>
-                                        <Select
-                                            labelId="metro-station-label"
-                                            id="metro-station-select"
-                                            name="metroStation"
-                                            value={formData.metroStation}
-                                            label="Estación de metro"
-                                            onChange={handleChange}
-                                        >
-                                            <ListSubheader>Linea 2</ListSubheader>
-                                            <MenuItem value="Cuatro Caminos">Cuatro Caminos</MenuItem>
-                                            <MenuItem value="Panteones">Panteones</MenuItem>
-                                            <MenuItem value="Tacuba">Tacuba</MenuItem>
-                                            <MenuItem value="Cuitláhuac">Cuitláhuac</MenuItem>
-                                            <MenuItem value="Popotla">Popotla</MenuItem>
-                                            <MenuItem value="Colegio Militar">Colegio Militar</MenuItem>
-                                            <MenuItem value="Normal">Normal</MenuItem>
-                                            <MenuItem value="San Cosme">San Cosme</MenuItem>
-                                            <MenuItem value="Revolución">Revolución</MenuItem>
-                                            <MenuItem value="Hidalgo">Hidalgo</MenuItem>
-
-                                            <ListSubheader>Linea 7</ListSubheader>
-                                            <MenuItem value="Camarones">Camarones</MenuItem>
-                                            <MenuItem value="Refinería">Refinería</MenuItem>
-                                            <MenuItem value="Tacuba (L7)">Tacuba</MenuItem>
-                                            <MenuItem value="San Joaquín">San Joaquín</MenuItem>
-                                            <MenuItem value="Polanco">Polanco</MenuItem>
-                                            <MenuItem value="Auditorio">Auditorio</MenuItem>
-                                        </Select>
-                                    </FormControl>
                                 </Grid>
                             </Grid>
                         </Paper>
@@ -440,7 +511,7 @@ export default function CheckoutPage() {
                                 <strong>Email:</strong> {formData.email}<br />
                                 <strong>Teléfono:</strong> {formData.phone}<br />
                                 <strong>Estación de metro:</strong> {formData.metroStation || 'No especificada'}<br />
-                                <strong>Método de envío:</strong> Envío a estación de metro más cercana
+                                <strong>Método de envío:</strong> {shippingMethod === 'domicilio' ? 'Envío a domicilio' : 'Entrega en metro Popotla'}
                             </Typography>
 
                             <Typography variant="subtitle1" sx={{ mt: 2, fontWeight: 'bold' }}>
@@ -478,11 +549,11 @@ export default function CheckoutPage() {
                             )}
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                                 <Typography>Envío:</Typography>
-                                <Typography>{formatPrice(shipping)}</Typography>
+                                <Typography>{formatPrice(shippingCost)}</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <Typography variant="h6">Total:</Typography>
-                                <Typography variant="h6">{formatPrice(total)}</Typography>
+                                <Typography variant="h6">{formatPrice(total + shippingCost)}</Typography>
                             </Box>
 
                             <Box sx={{
@@ -549,7 +620,7 @@ export default function CheckoutPage() {
                 </Grid>
 
                 <Grid item xs={12} md={5}>
-                    <Paper elevation={2} sx={{ p: 3, position: 'sticky', top: 16 }}>
+                    <Paper elevation={2} sx={{ p: 3, position: 'sticky', top: 130 }}>
                         <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                             Resumen del pedido
                         </Typography>
@@ -579,14 +650,14 @@ export default function CheckoutPage() {
                         )}
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                             <Typography>Envío:</Typography>
-                            <Typography>{formatPrice(shipping)}</Typography>
+                            <Typography>{formatPrice(shippingCost)}</Typography>
                         </Box>
 
                         <Divider sx={{ my: 2 }} />
 
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                             <Typography variant="h6">Total:</Typography>
-                            <Typography variant="h6">{formatPrice(total + shipping)}</Typography>
+                            <Typography variant="h6">{formatPrice(total + shippingCost)}</Typography>
                         </Box>
                     </Paper>
                 </Grid>
