@@ -1,4 +1,4 @@
-export const INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutos antes de iniciar monitoreo
+export const INACTIVITY_TIMEOUT = 1 * 60 * 1000; // 15 minutos antes de iniciar monitoreo
 export const CHECK_INTERVAL = 1 * 60 * 1000; // 1 minuto de monitoreo
 export const ACTIVITY_EVENTS = ['click']; // Solo monitorear clicks
 

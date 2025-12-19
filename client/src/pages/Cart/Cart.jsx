@@ -149,7 +149,7 @@ const Cart = () => {
                 Tu Carrito
             </Typography>
 
-            <Grid container spacing={4}>
+            <Grid container spacing={4} sx={{ justifyContent: 'space-between' }}>
                 <Grid className="cart-container" item xs={12} md={8}>
                     {isMobile ? (
                         <Box>
@@ -169,12 +169,12 @@ const Cart = () => {
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                                         <Typography variant="body2">Precio: {formatPrice(item.price)}</Typography>
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <IconButton size="small" onClick={() => handleQuantityChange(item.productId, getSizeOnly(item.size), item.quantity - 1)} disabled={item.quantity <= 1}><RemoveIcon /></IconButton>
+                                            <IconButton size="small" onClick={() => handleQuantityChange(item.productId, item.size, item.quantity - 1)} disabled={item.quantity <= 1}><RemoveIcon /></IconButton>
                                             {item.quantity}
-                                            <IconButton size="small" onClick={() => handleQuantityChange(item.productId, getSizeOnly(item.size), item.quantity + 1)}><AddIcon /></IconButton>
+                                            <IconButton size="small" onClick={() => handleQuantityChange(item.productId, item.size, item.quantity + 1)}><AddIcon /></IconButton>
                                         </Box>
                                         <Typography variant="body2">Total: {formatPrice(item.price * item.quantity)}</Typography>
-                                        <IconButton color="primary" onClick={() => removeFromCart(item.productId, getSizeOnly(item.size))}>
+                                        <IconButton color="primary" onClick={() => removeFromCart(item.productId, item.size)}>
                                             <DeleteIcon />
                                         </IconButton>
                                     </Box>
@@ -206,7 +206,6 @@ const Cart = () => {
                                                     <Box>
                                                         <Typography variant="subtitle2">{item.name}</Typography>
                                                         <Typography variant="caption" color="text.secondary">
-                                                            Talla: {item.size.split('__')[1]}
                                                         </Typography>
                                                     </Box>
                                                 </Box>
@@ -215,7 +214,7 @@ const Cart = () => {
                                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                                                     <IconButton
                                                         size="small"
-                                                        onClick={() => handleQuantityChange(item.productId, getSizeOnly(item.size), item.quantity - 1)}
+                                                        onClick={() => handleQuantityChange(item.productId, item.size, item.quantity - 1)}
                                                         disabled={item.quantity <= 1}
                                                     >
                                                         <RemoveIcon />
@@ -223,7 +222,7 @@ const Cart = () => {
                                                     <Typography>{item.quantity}</Typography>
                                                     <IconButton
                                                         size="small"
-                                                        onClick={() => handleQuantityChange(item.productId, getSizeOnly(item.size), item.quantity + 1)}
+                                                        onClick={() => handleQuantityChange(item.productId, item.size, item.quantity + 1)}
                                                     >
                                                         <AddIcon />
                                                     </IconButton>
@@ -238,7 +237,7 @@ const Cart = () => {
                                             <TableCell align="center">
                                                 <IconButton
                                                     color="primary"
-                                                    onClick={() => removeFromCart(item.productId, getSizeOnly(item.size))}
+                                                    onClick={() => removeFromCart(item.productId, item.size)}
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>

@@ -144,8 +144,8 @@ export function RegisterPage() {
                 const pendingItem = localStorage.getItem('pendingCartItem');
                 if (pendingItem) {
                     try {
-                        const { product, size, quantity } = JSON.parse(pendingItem);
-                        await addToCart(product, size, quantity);
+                        const { product, size, quantity, variant } = JSON.parse(pendingItem);
+                        await addToCart(product, size, quantity, variant);
                         localStorage.removeItem('pendingCartItem');
                     } catch (error) {
                         console.error('Error adding pending item to cart:', error);

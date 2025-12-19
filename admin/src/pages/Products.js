@@ -28,7 +28,7 @@ import {
   CardMedia,
   CardActionArea
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Close as CloseIcon, DragIndicator as DragIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon, Close as CloseIcon, DragIndicator as DragIcon, AddShoppingCart } from '@mui/icons-material';
 import {
   DndContext,
   closestCenter,
@@ -151,7 +151,8 @@ function Products() {
     images: [],
     category: '',
     featured: false,
-    inventory: {}
+    inventory: {},
+    variants: []
   });
   const [newImage, setNewImage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -200,7 +201,9 @@ function Products() {
         ...product,
         price: product.price.toString(),
         images: Array.isArray(product.images) ? product.images : [product.image].filter(Boolean),
-        inventory: product.inventory || {}
+        images: Array.isArray(product.images) ? product.images : [product.image].filter(Boolean),
+        inventory: product.inventory || {},
+        variants: product.variants || []
       });
     } else {
       setSelectedProduct(null);
@@ -213,8 +216,10 @@ function Products() {
         featured: false,
         inventory: AVAILABLE_SIZES.reduce((acc, size) => {
           acc[`new__${size}`] = 0;
+          acc[`new__${size}`] = 0;
           return acc;
-        }, {})
+        }, {}),
+        variants: []
       });
     }
     setOpen(true);
@@ -243,6 +248,81 @@ function Products() {
       }
     });
   };
+
+  // --- Logic for Variants ---
+  const handleAddVariant = () => {
+    setFormData({
+      ...formData,
+      variants: [
+        ...formData.variants,
+        {
+          id: crypto.randomUUID(),
+          color: '',
+          images: [],
+          inventory: AVAILABLE_SIZES.reduce((acc, size) => ({ ...acc, [size]: 0 }), {})
+        }
+      ]
+    });
+  };
+
+  const handleRemoveVariant = (variantId) => {
+    setFormData({
+      ...formData,
+      variants: formData.variants.filter(v => v.id !== variantId)
+    });
+  };
+
+  const handleVariantChange = (variantId, field, value) => {
+    setFormData({
+      ...formData,
+      variants: formData.variants.map(v =>
+        v.id === variantId ? { ...v, [field]: value } : v
+      )
+    });
+  };
+
+  const handleVariantInventoryChange = (variantId, size, value) => {
+    setFormData({
+      ...formData,
+      variants: formData.variants.map(v =>
+        v.id === variantId ? {
+          ...v,
+          inventory: {
+            ...v.inventory,
+            [size]: parseInt(value) || 0
+          }
+        } : v
+      )
+    });
+  };
+
+  const handleAddVariantImage = (variantId, newImageUrl) => {
+    if (!newImageUrl.trim()) return;
+    const urls = newImageUrl.split(/[,\n]/).map(url => url.trim()).filter(Boolean);
+
+    setFormData({
+      ...formData,
+      variants: formData.variants.map(v =>
+        v.id === variantId ? {
+          ...v,
+          images: [...v.images, ...urls]
+        } : v
+      )
+    });
+  };
+
+  const handleRemoveVariantImage = (variantId, imageUrl) => {
+    setFormData({
+      ...formData,
+      variants: formData.variants.map(v =>
+        v.id === variantId ? {
+          ...v,
+          images: v.images.filter(img => img !== imageUrl)
+        } : v
+      )
+    });
+  };
+  // --------------------------
 
   const handleAddImage = () => {
     if (!newImage.trim()) return;
@@ -314,8 +394,13 @@ function Products() {
 
       if (selectedProduct) {
         const filteredInventory = Object.entries(productData.inventory).reduce((acc, [key, value]) => {
-          if (value > 0) {
-            acc[key] = value;
+          // If it's a new input (new__SIZE), rename it to properly match ID
+          if (key.startsWith('new__')) {
+            const realKey = `${selectedProduct.id}__${key.split('__')[1]}`;
+            if (value > 0) acc[realKey] = value;
+          } else {
+            // Keep existing keys if they have value
+            if (value > 0) acc[key] = value;
           }
           return acc;
         }, {});
@@ -339,7 +424,8 @@ function Products() {
         }, {});
 
         await updateDoc(docRef, {
-          inventory: formattedInventory
+          inventory: formattedInventory,
+          variants: formData.variants || []
         });
       }
       handleClose();
@@ -405,6 +491,7 @@ function Products() {
           product.featured ? 'Sí' : 'No'
         ].join(',');
       })
+
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -525,29 +612,43 @@ function Products() {
                 <TableCell>${product.price}</TableCell>
                 <TableCell>{product.description}</TableCell>
                 <TableCell>{product.category}</TableCell>
+                <TableCell>{product.category}</TableCell>
                 <TableCell>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                    {product.images && product.images.length > 0 && (
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        style={{ height: 100, objectFit: 'cover', borderRadius: 4 }}
-                      />
-                    )}
-                    <Typography variant="body2">
-                      {Array.isArray(product.images) ? product.images.length : 1} imagen(es)
-                    </Typography>
-                  </Box>
+                  {product.variants && product.variants.length > 0 ? (
+                    <Box>
+                      <Typography variant="body2">{product.variants.length} variantes</Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        ({product.variants.map(v => v.color).join(', ')})
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                      {product.images && product.images.length > 0 && (
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          style={{ height: 100, objectFit: 'cover', borderRadius: 4 }}
+                        />
+                      )}
+                      <Typography variant="body2">
+                        {Array.isArray(product.images) ? product.images.length : 1} imagen(es)
+                      </Typography>
+                    </Box>
+                  )}
                 </TableCell>
                 <TableCell>
-                  {AVAILABLE_SIZES.map(size => {
-                    const sizeKey = `${product.id}__${size}`;
-                    const stock = product.inventory?.[sizeKey] || 0;
-                    if (stock > 0) {
-                      return `${size}: ${stock}, `;
-                    }
-                    return null;
-                  }).filter(Boolean)}
+                  {product.variants && product.variants.length > 0 ? (
+                    <Typography variant="body2">Ver detalle en edición</Typography>
+                  ) : (
+                    AVAILABLE_SIZES.map(size => {
+                      const sizeKey = `${product.id}__${size}`;
+                      const stock = product.inventory?.[sizeKey] || 0;
+                      if (stock > 0) {
+                        return `${size}: ${stock}, `;
+                      }
+                      return null;
+                    }).filter(Boolean)
+                  )}
                 </TableCell>
                 <TableCell>
                   <FormControlLabel
@@ -720,6 +821,84 @@ function Products() {
                 </Grid>
               ))}
             </Grid>
+          </Box>
+
+          <Box sx={{ mt: 3, mb: 2, borderTop: '1px solid #eee', pt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">Variantes / Colores</Typography>
+              <Button variant="outlined" onClick={handleAddVariant} startIcon={<AddShoppingCart />}>
+                Agregar Variante
+              </Button>
+            </Box>
+
+            {formData.variants && formData.variants.map((variant, index) => (
+              <Box key={variant.id} sx={{ mb: 4, p: 2, border: '1px solid #ddd', borderRadius: 2, bgcolor: '#f9f9f9' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="subtitle1" fontWeight="bold">Variante #{index + 1}</Typography>
+                  <IconButton color="error" onClick={() => handleRemoveVariant(variant.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+
+                <TextField
+                  label="Color / Nombre de Variante"
+                  value={variant.color}
+                  onChange={(e) => handleVariantChange(variant.id, 'color', e.target.value)}
+                  fullWidth
+                  size="small"
+                  sx={{ mb: 2 }}
+                  placeholder="Ej: Rojo, Azul Marino, Estampado floral"
+                />
+
+                {/* Variant Images */}
+                <Typography variant="caption" display="block" gutterBottom>Imágenes de la variante</Typography>
+                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                  <TextField
+                    size="small"
+                    fullWidth
+                    placeholder="URL de imagen"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddVariantImage(variant.id, e.target.value);
+                        e.target.value = '';
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                  {variant.images && variant.images.map((img, i) => (
+                    <Box key={i} sx={{ position: 'relative', width: 60, height: 60 }}>
+                      <img src={img} alt="Variant" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 4 }} />
+                      <IconButton
+                        size="small"
+                        sx={{ position: 'absolute', top: -5, right: -5, bgcolor: 'rgba(255,255,255,0.8)', p: 0.5 }}
+                        onClick={() => handleRemoveVariantImage(variant.id, img)}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </Box>
+
+                {/* Variant Inventory */}
+                <Typography variant="caption" display="block" gutterBottom>Inventario por talla</Typography>
+                <Grid container spacing={1}>
+                  {AVAILABLE_SIZES.map((size) => (
+                    <Grid item xs={4} sm={3} key={size}>
+                      <TextField
+                        label={size}
+                        type="number"
+                        size="small"
+                        value={variant.inventory?.[size] || 0}
+                        onChange={(e) => handleVariantInventoryChange(variant.id, size, e.target.value)}
+                        inputProps={{ min: 0 }}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            ))}
           </Box>
         </DialogContent>
         <DialogActions>
