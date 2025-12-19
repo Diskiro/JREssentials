@@ -70,12 +70,30 @@ export default function CatalogPage() {
                     formattedPrice: formatPrice(doc.data().price)
                 }));
 
-                // Filtrar productos que tienen al menos una talla con stock
+                // Filtrar productos que tienen al menos una talla con stock (ya sea en inventario principal o variantes)
                 const productsWithStock = productsList.filter(product => {
-                    if (!product.inventory) return false;
+                    // Check simple inventory
+                    let hasSimpleStock = false;
+                    if (product.inventory) {
+                        const totalStock = Object.values(product.inventory).reduce((sum, stock) => sum + stock, 0);
+                        if (totalStock > 0) hasSimpleStock = true;
+                    }
 
-                    const totalStock = Object.values(product.inventory).reduce((sum, stock) => sum + stock, 0);
-                    return totalStock > 0;
+                    // Check variants inventory
+                    let hasVariantStock = false;
+                    if (product.variants && Array.isArray(product.variants)) {
+                        for (const variant of product.variants) {
+                            if (variant.inventory) {
+                                const totalVariantStock = Object.values(variant.inventory).reduce((sum, stock) => sum + stock, 0);
+                                if (totalVariantStock > 0) {
+                                    hasVariantStock = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    return hasSimpleStock || hasVariantStock;
                 });
 
                 setProducts(productsWithStock);

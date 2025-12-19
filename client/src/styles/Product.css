@@ -27,3 +27,7 @@
         overflow: hidden;
     }
 }
+
+.variant-button.css-1mj5y45-MuiButtonBase-root-MuiButton-root{
+    border: 1px solid var(--primary-color);
+}

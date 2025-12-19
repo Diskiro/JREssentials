@@ -114,9 +114,9 @@ const OrderItem = React.memo(({ order, onOrderClick }) => {
                         <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                             ID del pedido
                         </Typography>
-                    <Typography variant="subtitle1" component="span">
+                        <Typography variant="subtitle1" component="span">
                             {order.id}
-                    </Typography>
+                        </Typography>
                     </Box>
                     <StyledStatusChip
                         label={order.status}
@@ -130,20 +130,20 @@ const OrderItem = React.memo(({ order, onOrderClick }) => {
                     Total: {formatPrice(order.totalAmount)}
                 </StyledOrderDate>
                 {order.status?.toLowerCase() === 'pendiente' && (
-                    <Box sx={{ 
-                        mt: 1, 
-                        p: 1, 
-                        bgcolor: 'warning.light', 
+                    <Box sx={{
+                        mt: 1,
+                        p: 1,
+                        bgcolor: 'warning.light',
                         borderRadius: 1,
                         color: 'warning.contrastText'
                     }}>
                         <Typography variant="body2" component="div">
                             Tienes 24 horas para enviar tu recibo de pago a este{' '}
-                            <Link 
-                                href="https://wa.me/527224992307" 
-                                target="_blank" 
+                            <Link
+                                href="https://wa.me/527224992307"
+                                target="_blank"
                                 rel="noopener noreferrer"
-                                sx={{ 
+                                sx={{
                                     color: 'warning.contrastText',
                                     textDecoration: 'underline',
                                     '&:hover': {
@@ -253,7 +253,7 @@ const User = () => {
 
     return (
         <FavoritesProvider>
-            <UserContent 
+            <UserContent
                 userData={userData}
                 orders={orders}
                 activeTab={activeTab}
@@ -268,12 +268,12 @@ const User = () => {
     );
 };
 
-const UserContent = ({ 
-    userData, 
-    orders, 
-    activeTab, 
-    onTabChange, 
-    onOrderClick, 
+const UserContent = ({
+    userData,
+    orders,
+    activeTab,
+    onTabChange,
+    onOrderClick,
     onEditProfile,
     snackbar,
     onCloseSnackbar,
@@ -315,7 +315,10 @@ const UserContent = ({
             <StyledFavoritesContainer>
                 <StyledFavoritesGrid>
                     {favorites.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                        <ProductCard
+                            key={`${product.id}-${product.selectedVariant?.id || 'base'}`}
+                            product={product}
+                        />
                     ))}
                 </StyledFavoritesGrid>
             </StyledFavoritesContainer>
@@ -326,9 +329,9 @@ const UserContent = ({
         <StyledContainer maxWidth="lg">
             <StyledGrid container spacing={4}>
                 <Grid item xs={12} md={4}>
-                    <UserProfile 
-                        userData={userData} 
-                        onEditProfile={onEditProfile} 
+                    <UserProfile
+                        userData={userData}
+                        onEditProfile={onEditProfile}
                     />
                 </Grid>
 
@@ -355,9 +358,9 @@ const UserContent = ({
                                     <List>
                                         {orders.map((order) => (
                                             <React.Fragment key={order.id}>
-                                                <OrderItem 
-                                                    order={order} 
-                                                    onOrderClick={onOrderClick} 
+                                                <OrderItem
+                                                    order={order}
+                                                    onOrderClick={onOrderClick}
                                                 />
                                                 <StyledDivider />
                                             </React.Fragment>
@@ -379,12 +382,12 @@ const UserContent = ({
             </StyledGrid>
 
             <Snackbar
-                open={snackbar.open} 
+                open={snackbar.open}
                 autoHideDuration={6000}
                 onClose={onCloseSnackbar}
             >
-                <Alert 
-                    onClose={onCloseSnackbar} 
+                <Alert
+                    onClose={onCloseSnackbar}
                     severity={snackbar.severity}
                     sx={{ width: '100%' }}
                 >

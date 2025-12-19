@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, updateDoc, increment, query, collection, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, increment, query, collection, where, getDocs, runTransaction } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 import debounce from 'lodash.debounce';
 
@@ -24,6 +24,12 @@ export const CartProvider = ({ children }) => {
     const { user, handleLogout } = useAuth();
     const stockCacheRef = useRef({});
 
+    const userRef = useRef(user);
+
+    useEffect(() => {
+        userRef.current = user;
+    }, [user]);
+
     // Persistir carrito de invitado en LocalStorage
     useEffect(() => {
         if (!user) {
@@ -41,6 +47,15 @@ export const CartProvider = ({ children }) => {
             }
 
             const productData = productDoc.data();
+
+            // Check if sizeKey implies a variant (Format: productId__variantId__size)
+            const parts = sizeKey.split('__');
+            if (parts.length === 3) {
+                const [_, variantId, size] = parts;
+                const variant = productData.variants?.find(v => v.id === variantId);
+                return variant?.inventory?.[size] || 0;
+            }
+
             const availableStock = productData.inventory?.[sizeKey] || 0;
 
             return availableStock;
@@ -60,16 +75,37 @@ export const CartProvider = ({ children }) => {
                 throw new Error('Producto no encontrado');
             }
 
-            const currentStock = productDoc.data().inventory?.[sizeKey] || 0;
-            const newStock = currentStock - quantity;
+            const parts = sizeKey.split('__');
 
-            if (newStock < 0) {
-                throw new Error('No hay suficiente stock disponible');
+            if (parts.length === 3) {
+                const [_, variantId, size] = parts;
+                const productData = productDoc.data();
+                const variants = productData.variants || [];
+                const variantIndex = variants.findIndex(v => v.id === variantId);
+
+                if (variantIndex === -1) throw new Error('Variante no encontrada');
+
+                const currentStock = variants[variantIndex].inventory?.[size] || 0;
+                const newStock = currentStock - quantity;
+
+                if (newStock < 0) throw new Error('No hay suficiente stock disponible');
+
+                // Update specific variant inventory inside the array
+                variants[variantIndex].inventory[size] = newStock;
+                await updateDoc(productRef, { variants });
+
+            } else {
+                const currentStock = productDoc.data().inventory?.[sizeKey] || 0;
+                const newStock = currentStock - quantity;
+
+                if (newStock < 0) {
+                    throw new Error('No hay suficiente stock disponible');
+                }
+
+                await updateDoc(productRef, {
+                    [`inventory.${sizeKey}`]: newStock
+                });
             }
-
-            await updateDoc(productRef, {
-                [`inventory.${sizeKey}`]: newStock
-            });
 
         } catch (error) {
             console.error('❌ Error al actualizar stock:', error);
@@ -81,8 +117,8 @@ export const CartProvider = ({ children }) => {
     const debouncedSaveCart = useCallback(
         debounce(async (cartData) => {
             try {
-                if (user) {
-                    await setDoc(doc(db, 'storeUsers', user.uid), {
+                if (userRef.current) {
+                    await setDoc(doc(db, 'storeUsers', userRef.current.uid), {
                         cart: cartData,
                         updatedAt: new Date().toISOString()
                     }, { merge: true });
@@ -92,7 +128,7 @@ export const CartProvider = ({ children }) => {
                 throw error;
             }
         }, 1000),
-        [user]
+        []
     );
 
     // Helper para fusionar y guardar
@@ -156,17 +192,18 @@ export const CartProvider = ({ children }) => {
     useEffect(() => {
         if (user) {
             initializeCart();
+        } else {
+            setCart([]);
         }
     }, [user, initializeCart]);
 
-    const updateQuantity = async (productId, size, quantity) => {
+    const updateQuantity = async (productId, sizeKey, quantity) => {
         try {
             if (quantity <= 0) {
-                removeFromCart(productId, size);
+                removeFromCart(productId, sizeKey);
                 return;
             }
 
-            const sizeKey = `${productId}__${size}`;
             const currentItem = cart.find(item => item.size === sizeKey);
 
             if (!currentItem) {
@@ -176,21 +213,18 @@ export const CartProvider = ({ children }) => {
             // Calcular la diferencia entre la cantidad actual y la nueva
             const quantityDifference = quantity - currentItem.quantity;
 
-            if (quantityDifference > 0) {
-                // Si estamos aumentando la cantidad, verificar el stock disponible
-                const availableStock = await getProductStock(productId, sizeKey);
-                if (availableStock < quantityDifference) {
-                    throw new Error(`No hay suficiente stock disponible. Solo quedan ${availableStock} unidades.`);
+            if (quantityDifference !== 0) {
+                // Si la diferencia es positiva, se están pidiendo más, checar stock
+                // Si es negativa, se están devolviendo al stock
+                if (quantityDifference > 0) {
+                    const availableStock = await getProductStock(productId, sizeKey);
+                    if (availableStock < quantityDifference) {
+                        throw new Error(`No hay suficiente stock disponible. Solo quedan ${availableStock} unidades.`);
+                    }
                 }
-                // Actualizar el inventario en la base de datos
-                await updateDoc(doc(db, 'products', productId), {
-                    [`inventory.${sizeKey}`]: increment(-quantityDifference)
-                });
-            } else if (quantityDifference < 0) {
-                // Si estamos reduciendo la cantidad, devolver al inventario la diferencia exacta
-                await updateDoc(doc(db, 'products', productId), {
-                    [`inventory.${sizeKey}`]: increment(Math.abs(quantityDifference))
-                });
+
+                // Usar la función helper que ya maneja variantes
+                await updateProductStock(productId, sizeKey, quantityDifference);
             }
 
             // Actualizar el carrito
@@ -210,13 +244,26 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    const addToCart = async (product, size, quantity = 1) => {
+    const addToCart = async (product, size, quantity = 1, variant = null) => {
         try {
             if (quantity <= 0) {
                 throw new Error('La cantidad debe ser mayor a 0');
             }
 
-            const sizeKey = `${product.id}__${size}`;
+            let sizeKey;
+            let itemImage;
+            let itemName;
+
+            if (variant) {
+                sizeKey = `${product.id}__${variant.id}__${size}`;
+                itemImage = variant.images?.[0] || product.images?.[0] || '';
+                itemName = `${product.name} - ${variant.color}`;
+            } else {
+                sizeKey = `${product.id}__${size}`;
+                itemImage = product.images?.[0] || '';
+                itemName = product.name;
+            }
+
             const existingItemIndex = cart.findIndex(item => item.size === sizeKey);
 
             // Obtener stock actualizado directamente de la base de datos
@@ -231,7 +278,7 @@ export const CartProvider = ({ children }) => {
                 throw new Error('El producto está agotado');
             }
 
-            // Verificar si hay suficiente stock
+            // Verificar si hay suficiente stock (Check logic matches getProductStock return)
             if (newTotalQuantity > realAvailableStock) {
                 const disponibles = realAvailableStock - currentCartQuantity;
                 throw new Error(`No hay suficiente stock disponible. Solo quedan ${disponibles} unidades disponibles.`);
@@ -247,11 +294,11 @@ export const CartProvider = ({ children }) => {
             } else {
                 newCart.push({
                     productId: product.id,
-                    name: product.name,
+                    name: itemName,
                     price: product.price,
                     size: sizeKey,
                     quantity: quantity,
-                    image: product.images?.[0] || '',
+                    image: itemImage,
                     createdAt: new Date().toISOString()
                 });
             }
@@ -260,7 +307,7 @@ export const CartProvider = ({ children }) => {
 
             // IMPORTANTE: Si es usuario logueado, se guarda en firebase via debouncedSaveCart
             // Si es invitado, el useEffect detectará el cambio y guardará en localStorage
-            if (user) {
+            if (userRef.current) {
                 await debouncedSaveCart(newCart);
             } else {
                 localStorage.setItem('guestCart', JSON.stringify(newCart));
@@ -273,23 +320,22 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    const removeFromCart = async (productId, size) => {
+    const removeFromCart = async (productId, sizeKey) => {
         try {
-            const sizeKey = `${productId}__${size}`;
             const itemToRemove = cart.find(item => item.size === sizeKey);
 
             if (itemToRemove) {
-                // Restaurar el inventario en la base de datos con la cantidad exacta
-                const productRef = doc(db, 'products', productId);
-                await updateDoc(productRef, {
-                    [`inventory.${sizeKey}`]: increment(itemToRemove.quantity)
-                });
+                // Restaurar el inventario usando el helper con cantidad negativa para sumar al stock (o lógica inversa)
+                // updateProductStock resta la cantidad. Si pasamos negativo (-cantidad), sumará.
+                await updateProductStock(productId, sizeKey, -itemToRemove.quantity);
             }
 
             const newCart = cart.filter(item => item.size !== sizeKey);
             setCart(newCart);
 
-            if (user) {
+            setCart(newCart);
+
+            if (userRef.current) {
                 debouncedSaveCart(newCart);
             } else {
                 localStorage.setItem('guestCart', JSON.stringify(newCart));
@@ -329,13 +375,35 @@ export const CartProvider = ({ children }) => {
         try {
             // Restaurar stock en la base de datos
             const restoreStockPromises = cart.map(async (item) => {
-                const [productId, size] = item.size.split('__');
-                const productRef = doc(db, 'products', productId);
+                const parts = item.size.split('__');
+                const productRef = doc(db, 'products', parts[0]);
 
-                // Devolver exactamente la misma cantidad que estaba en el carrito
-                await updateDoc(productRef, {
-                    [`inventory.${item.size}`]: increment(item.quantity)
-                });
+                if (parts.length === 3) {
+                    // It's a variant: productId__variantId__size
+                    const [_, variantId, size] = parts;
+                    // We need to read, modify array, write back
+                    // Since inside map/loop, this might be heavy but necessary
+                    try {
+                        await runTransaction(db, async (transaction) => {
+                            const pDoc = await transaction.get(productRef);
+                            if (!pDoc.exists()) return;
+                            const pData = pDoc.data();
+                            const variants = pData.variants || [];
+                            const vIndex = variants.findIndex(v => v.id === variantId);
+                            if (vIndex !== -1) {
+                                variants[vIndex].inventory[size] = (variants[vIndex].inventory[size] || 0) + item.quantity;
+                                transaction.update(productRef, { variants });
+                            }
+                        });
+                    } catch (e) {
+                        console.error("Error restoring variant stock", e);
+                        // Fallback or retry?
+                    }
+                } else {
+                    await updateDoc(productRef, {
+                        [`inventory.${item.size}`]: increment(item.quantity)
+                    });
+                }
             });
 
             await Promise.all(restoreStockPromises);
@@ -364,9 +432,25 @@ export const CartProvider = ({ children }) => {
                 const productRef = doc(db, 'products', productId);
 
                 try {
-                    await updateDoc(productRef, {
-                        [`inventory.${item.size}`]: increment(item.quantity)
-                    });
+                    // logic restoration same as clearCart
+                    const parts = item.size.split('__');
+                    if (parts.length === 3) {
+                        const [_, variantId, size] = parts;
+                        const pDoc = await getDoc(productRef);
+                        if (pDoc.exists()) {
+                            const pData = pDoc.data();
+                            const variants = pData.variants || [];
+                            const vIndex = variants.findIndex(v => v.id === variantId);
+                            if (vIndex !== -1) {
+                                variants[vIndex].inventory[size] = (variants[vIndex].inventory[size] || 0) + item.quantity;
+                                await updateDoc(productRef, { variants });
+                            }
+                        }
+                    } else {
+                        await updateDoc(productRef, {
+                            [`inventory.${item.size}`]: increment(item.quantity)
+                        });
+                    }
                 } catch (e) { console.error("Error restaurando stock inactividad", e) }
             }
             setCart([]);
@@ -399,10 +483,29 @@ export const CartProvider = ({ children }) => {
                     continue;
                 }
 
-                // Actualizar el stock de la talla específica
-                await updateDoc(productRef, {
-                    [`inventory.${item.size}`]: increment(item.quantity)
-                });
+                // Restaurar stock
+                const parts = item.size.split('__');
+                if (parts.length === 3) {
+                    const [_, variantId, size] = parts;
+                    console.log(`🔍 Buscando variante ${variantId} talla ${size}...`);
+                    const variants = productDoc.data().variants || [];
+                    const vIndex = variants.findIndex(v => v.id === variantId);
+
+                    if (vIndex !== -1) {
+                        const oldStock = variants[vIndex].inventory[size] || 0;
+                        const newStock = oldStock + item.quantity;
+                        variants[vIndex].inventory[size] = newStock;
+                        console.log(`✅ Restaurando variante: Stock anterior ${oldStock} -> Nuevo ${newStock}`);
+                        await updateDoc(productRef, { variants });
+                    } else {
+                        console.warn(`⚠️ Variante ${variantId} no encontrada en producto ${item.productId}`);
+                    }
+                } else {
+                    console.log(`📦 Restaurando producto simple: +${item.quantity}`);
+                    await updateDoc(productRef, {
+                        [`inventory.${item.size}`]: increment(item.quantity)
+                    });
+                }
             }
 
             // Limpiar el carrito en la base de datos
